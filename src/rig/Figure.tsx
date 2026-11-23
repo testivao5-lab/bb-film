@@ -43,6 +43,8 @@ export interface FigureProps {
   bloodHand?: number; // 0..1 blood on the near hand
   rimLight?: string; // colour of the rim light
   rimSide?: 1 | -1;
+  /** clothing cut drawn on the torso */
+  outfit?: "jacket" | "hoodie";
 }
 
 type V = [number, number];
@@ -137,7 +139,7 @@ export function solveSkeleton(p: Pose, height: number, view: number) {
   return { k, pelvis, chest, headC, up, side, armL: L, armR: R, legL: LL, legR: LR, torsoLen };
 }
 
-export const Figure: React.FC<FigureProps> = ({ pose, look, pal, view, height = 1.78, ground = true, blood = 0, bloodHand = 0, rimLight, rimSide = 1 }) => {
+export const Figure: React.FC<FigureProps> = ({ pose, look, pal, view, height = 1.78, ground = true, blood = 0, bloodHand = 0, rimLight, rimSide = 1, outfit = "jacket" }) => {
   const S = solveSkeleton(pose, height, view);
   const k = S.k;
   const olw = 0.011 * k;
@@ -204,7 +206,18 @@ export const Figure: React.FC<FigureProps> = ({ pose, look, pal, view, height = 
       <path d={`M${tw * 0.44},${0.04 * k} C${tw * 0.52},${-TL * 0.4} ${tw * 0.55},${-TL * 0.85} ${tw * 0.5},${-TL * 0.98} L${tw * 0.2},${-TL * 0.98} C${tw * 0.25},${-TL * 0.6} ${tw * 0.22},${-TL * 0.3} ${tw * 0.18},${0.04 * k} Z`} fill={pal.jacketShade} opacity={0.7} />
       {/* light band */}
       <path d={`M${-tw * 0.36},${-TL * 0.1} C${-tw * 0.42},${-TL * 0.45} ${-tw * 0.44},${-TL * 0.75} ${-tw * 0.38},${-TL * 0.92}`} stroke={pal.jacketLight} strokeWidth={0.02 * k} fill="none" opacity={0.45} strokeLinecap="round" />
-      {view < 0.6 ? (
+      {view < 0.6 && outfit === "hoodie" ? (
+        <g>
+          {/* hoodie: bunched hood behind the neck, crew neckline with tee, drawstrings, kangaroo pocket */}
+          <path d={`M${-tw * 0.4},${-TL * 0.93} C${-tw * 0.42},${-TL * 1.16} ${tw * 0.42},${-TL * 1.16} ${tw * 0.4},${-TL * 0.93} C${tw * 0.25},${-TL * 1.0} ${-tw * 0.25},${-TL * 1.0} ${-tw * 0.4},${-TL * 0.93} Z`} fill={pal.jacketShade} stroke={pal.outline} strokeWidth={olw * 0.8} strokeLinejoin="round" />
+          <path d={`M${-tw * 0.15},${-TL * 0.99} Q0,${-TL * 0.88} ${tw * 0.15},${-TL * 0.99} Z`} fill={pal.shirt} stroke={pal.outline} strokeWidth={olw * 0.7} />
+          <path d={`M${-tw * 0.08},${-TL * 0.93} q${-0.005 * k},${0.1 * k} ${0.004 * k},${0.16 * k} M${tw * 0.08},${-TL * 0.93} q${0.006 * k},${0.09 * k} ${-0.002 * k},${0.15 * k}`} stroke={pal.shirt} strokeWidth={0.009 * k} fill="none" strokeLinecap="round" />
+          <path d={`M${-tw * 0.3},${-TL * 0.12} L${-tw * 0.22},${-TL * 0.4} L${tw * 0.22},${-TL * 0.4} L${tw * 0.3},${-TL * 0.12} Z`} fill={pal.jacketShade} opacity={0.55} stroke={pal.outline} strokeWidth={olw * 0.5} />
+          <path d={`M${-tw * 0.44},${-0.01 * k} L${tw * 0.44},${-0.01 * k}`} stroke={pal.jacketShade} strokeWidth={0.035 * k} />
+          {/* fabric folds */}
+          <path d={`M${-tw * 0.2},${-TL * 0.62} q${0.02 * k},${0.05 * k} ${0.06 * k},${0.06 * k} M${tw * 0.18},${-TL * 0.55} q${-0.02 * k},${0.04 * k} ${-0.05 * k},${0.05 * k}`} stroke={pal.jacketShade} strokeWidth={0.008 * k} fill="none" />
+        </g>
+      ) : view < 0.6 ? (
         <g>
           {/* henley shirt V + placket */}
           <path d={`M${-tw * 0.17},${-TL * 0.99} L0,${-TL * 0.7} L${tw * 0.17},${-TL * 0.99} Z`} fill={pal.shirt} stroke={pal.outline} strokeWidth={olw * 0.8} />
@@ -220,6 +233,17 @@ export const Figure: React.FC<FigureProps> = ({ pose, look, pal, view, height = 
           <path d={`M${tw * 0.12},${-TL * 0.58} h${tw * 0.24} v${0.07 * k} h${-tw * 0.24} Z`} fill={pal.jacketShade} stroke={pal.outline} strokeWidth={olw * 0.6} />
           {/* hem band */}
           <path d={`M${-tw * 0.44},${-0.01 * k} L${tw * 0.44},${-0.01 * k}`} stroke={pal.jacketShade} strokeWidth={0.03 * k} />
+        </g>
+      ) : outfit === "hoodie" ? (
+        <g>
+          {/* side view hoodie: hood bunched behind the neck, drawstring at the front, pouch seam */}
+          <path d={`M${-tw * 0.48},${-TL * 0.84} C${-tw * 0.62},${-TL * 1.08} ${-tw * 0.2},${-TL * 1.2} ${tw * 0.08},${-TL * 1.02} C${-tw * 0.1},${-TL * 0.98} ${-tw * 0.3},${-TL * 0.92} ${-tw * 0.48},${-TL * 0.84} Z`} fill={pal.jacketShade} stroke={pal.outline} strokeWidth={olw * 0.8} strokeLinejoin="round" />
+          <path d={`M${-tw * 0.4},${-TL * 0.9} C${-tw * 0.45},${-TL * 1.02} ${-tw * 0.2},${-TL * 1.1} ${-tw * 0.02},${-TL * 1.0}`} stroke={pal.jacketLight} strokeWidth={0.01 * k} fill="none" opacity={0.6} />
+          <path d={`M${tw * 0.12},${-TL * 1.0} L${tw * 0.36},${-TL * 0.93}`} stroke={pal.shirt} strokeWidth={0.012 * k} />
+          <path d={`M${tw * 0.32},${-TL * 0.93} q${0.01 * k},${0.09 * k} ${0.003 * k},${0.15 * k}`} stroke={pal.shirt} strokeWidth={0.008 * k} fill="none" strokeLinecap="round" />
+          <path d={`M${tw * 0.42},${-TL * 0.36} Q${tw * 0.1},${-TL * 0.4} ${-tw * 0.05},${-TL * 0.12}`} stroke={pal.jacketShade} strokeWidth={0.01 * k} fill="none" />
+          <path d={`M${-tw * 0.1},${-TL * 0.7} q${0.04 * k},${0.03 * k} ${0.09 * k},${0.02 * k} M${-tw * 0.15},${-TL * 0.5} q${0.05 * k},${0.03 * k} ${0.1 * k},${0.01 * k}`} stroke={pal.jacketShade} strokeWidth={0.008 * k} fill="none" />
+          <path d={`M${-tw * 0.44},${-0.01 * k} L${tw * 0.44},${-0.01 * k}`} stroke={pal.jacketShade} strokeWidth={0.035 * k} />
         </g>
       ) : (
         <g>

@@ -20,8 +20,9 @@ import { TEACHER, teacherLook, tint, mixHex } from "../rig/cast";
 import { LabRoom, Tank, Fluoro, LightCone, GlassWall, GlassTable, MaskPost, Hose, BloodPool, FloorGlow, HandSmear, LAB } from "../env/Lab";
 import { NightSky, Ridge, LabBuilding, Pickup, FencePosts, DesertGround } from "../env/LabExterior";
 import { Finish, Motes, Streak } from "../fx/Post";
+import { ColdOpenB, CUT_B } from "./ColdOpenB";
 
-export const COLD_OPEN = { start: 0, dur: sec(22.4) };
+export const COLD_OPEN = { start: 0, dur: CUT_B.end };
 const CUT = { s1: 0, s2: sec(3.1), s3: sec(9.4), s4: sec(13.3), s5: sec(17.95), s6: sec(20.75), end: sec(22.4) };
 
 // night-lab grade for characters: cool key, blue rim
@@ -367,6 +368,7 @@ export const ColdOpen: React.FC = () => (
     <Sequence from={CUT.s4} durationInFrames={CUT.s5 - CUT.s4} name="S4 overhead"><S4 /></Sequence>
     <Sequence from={CUT.s5} durationInFrames={CUT.s6 - CUT.s5} name="S5 handprint"><S5 /></Sequence>
     <Sequence from={CUT.s6} durationInFrames={CUT.end - CUT.s6} name="S6 hand insert"><S6 /></Sequence>
+    <Sequence from={CUT_B.s7} durationInFrames={CUT_B.end - CUT_B.s7} name="Part B (S7–S10)"><ColdOpenB /></Sequence>
     {/* ambient beds – barely audible (narration = 1.0) */}
     <Sequence from={0} durationInFrames={CUT.s2 + 6}><Audio src={staticFile("sfx/night_wind.wav")} volume={(fr) => 0.035 * Math.min(1, (CUT.s2 + 6 - fr) / 6)} /></Sequence>
     <Sequence from={CUT.s2} durationInFrames={CUT.end - CUT.s2}><Audio src={staticFile("sfx/roomtone_lab.wav")} volume={0.04} /></Sequence>

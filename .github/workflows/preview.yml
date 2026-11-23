@@ -1,0 +1,52 @@
+# Quick visual QA on GitHub's machines: renders stills at chosen frames → one contact-sheet JPG artifact.
+name: Preview stills
+
+on:
+  workflow_dispatch:
+    inputs:
+      composition:
+        description: "Composition id"
+        default: "BreakingFilm"
+        required: true
+      frames:
+        description: "Comma-separated GLOBAL frame numbers (30 fps), e.g. 1140,1200,1300"
+        required: true
+      tag:
+        description: "Name for the artifact (e.g. batchA-s002)"
+        default: "preview"
+        required: true
+
+jobs:
+  stills:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Chrome dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libnss3 libatk1.0-0t64 libatk-bridge2.0-0t64 libxdamage1 libxkbcommon0 libgbm1 libasound2t64 fonts-dejavu-core >/dev/null
+          npx remotion browser ensure
+      - name: Narration
+        run: pipx run gdown "${{ vars.NARRATION_DRIVE_ID || '1Sj3hZAk7Z7TkplEKAaY1nbWkNzIhl_wd' }}" -O public/narration.wav
+      - name: Type check
+        run: npx tsc --noEmit -p .
+      - name: Render stills
+        run: |
+          npx remotion bundle src/index.ts --out-dir /tmp/bundle --log=error
+          mkdir -p out/preview
+          IFS=',' read -ra FR <<< "${{ inputs.frames }}"
+          for f in "${FR[@]}"; do f=$(echo $f | tr -d ' '); npx remotion still /tmp/bundle "${{ inputs.composition }}" "out/preview/f_$(printf %06d $f).jpg" --frame=$f --jpeg-quality=88 --log=error; done
+      - name: Contact sheet
+        run: |
+          pip install -q pillow
+          python3 tools/contact_sheet.py out/preview out/preview/contact_sheet.jpg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.tag }}
+          path: out/preview/
+          retention-days: 7
