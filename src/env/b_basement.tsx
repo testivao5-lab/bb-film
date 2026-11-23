@@ -91,8 +91,9 @@ export const BasementRoom: React.FC<{ cam: Cam; f: number; bulb?: number; shaft?
         </g>
       )}
       {/* ducts + pipes along the ceiling (mid layer) */}
-      <polygon points={qOf(cam, [[-3.4, BS.ceil - 0.21, 6.1], [-0.2, BS.ceil - 0.23, 6.1], [-0.2, BS.ceil - 0.4, 6.1], [-3.4, BS.ceil - 0.38, 6.1]])} fill="#7c828a" />
-      <polygon points={qOf(cam, [[-3.4, BS.ceil - 0.31, 6.1], [-0.2, BS.ceil - 0.33, 6.1], [-0.2, BS.ceil - 0.4, 6.1], [-3.4, BS.ceil - 0.38, 6.1]])} fill="#4f555c" />
+      <polygon points={qOf(cam, [[-3.4, BS.ceil - 0.2, BS.zBack - 0.12], [3.4, BS.ceil - 0.22, BS.zBack - 0.12], [3.4, BS.ceil - 0.4, BS.zBack - 0.12], [-3.4, BS.ceil - 0.38, BS.zBack - 0.12]])} fill="#6d737a" />
+      <polygon points={qOf(cam, [[-3.4, BS.ceil - 0.31, BS.zBack - 0.12], [3.4, BS.ceil - 0.33, BS.zBack - 0.12], [3.4, BS.ceil - 0.4, BS.zBack - 0.12], [-3.4, BS.ceil - 0.38, BS.zBack - 0.12]])} fill="#454b52" />
+      {[-2.6, -1.2, 0.2, 1.6, 3.0].map((hx) => <polygon key={hx} points={qOf(cam, [[hx, BS.ceil - 0.04, BS.zBack - 0.1], [hx + 0.06, BS.ceil - 0.04, BS.zBack - 0.1], [hx + 0.06, BS.ceil - 0.36, BS.zBack - 0.1], [hx, BS.ceil - 0.36, BS.zBack - 0.1]])} fill="#3a4046" />)}
       <polygon points={qOf(cam, [[2.2, BS.ceil - 0.24, 4.2], [3.4, BS.ceil - 0.22, 4.2], [3.4, BS.ceil - 0.36, 4.2], [2.2, BS.ceil - 0.38, 4.2]])} fill="#7d6a52" />
       {/* high window (daylight, cool) at back-left + shaft of light into the dust */}
       <polygon points={wallQuad(cam, -2.75, -1.75, 1.62, 2.16, BS.zBack - 0.01)} fill="#20262b" />
@@ -282,3 +283,25 @@ export const Bucket: React.FC<{ cam: Cam; x: number; z: number }> = ({ cam, x, z
 export const FloorStain: React.FC<{ cam: Cam; x: number; z: number; r?: number; color?: string; o?: number; seed?: number }> = ({ cam, x, z, r = 0.4, color = "#5e2a20", o = 0.35, seed = 1 }) => (
   <polygon points={flatDisc(cam, x, z, r, 0.004, 18, 0.42, seed)} fill={color} opacity={o} />
 );
+
+/** towing chain from the post to an ankle: sagging curve of links (storytelling prop) */
+export const Chain: React.FC<{ cam: Cam; from: [number, number, number]; to: [number, number, number]; sag?: number; seed?: number }> = ({ cam, from, to, sag = 0.16 }) => {
+  const n = 22;
+  return (
+    <g>
+      {Array.from({ length: n }).map((_, i) => {
+        const t = i / (n - 1);
+        const x = lerp(from[0], to[0], t);
+        const z = lerp(from[2], to[2], t);
+        const y = lerp(from[1], to[1], t) - Math.sin(t * Math.PI) * sag;
+        const p = project(cam, x, y, z);
+        const s2 = p.s;
+        return (
+          <g key={i} transform={`translate(${p.x},${p.y}) rotate(${(i % 2 ? 28 : -28) + t * 20})`}>
+            <ellipse rx={0.014 * s2} ry={0.024 * s2} fill="none" stroke={i % 3 ? "#9aa3aa" : "#6d767d"} strokeWidth={Math.max(1, 0.007 * s2)} />
+          </g>
+        );
+      })}
+    </g>
+  );
+};

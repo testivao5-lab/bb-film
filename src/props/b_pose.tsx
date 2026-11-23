@@ -25,7 +25,8 @@ export function walkPose(phase: number, amp = 1, o: Partial<Pose> = {}): Pose {
 
 /** seated on the floor, back against something at +x, knees up (prisoner pose) */
 export function floorSit(o: Partial<Pose> = {}): Pose {
-  return { torso: -14, neck: 6, shL: -8, shR: -8, elL: 22, elR: 22, hipL: 78, hipR: 80, knL: 92, knR: 94, breathe: 0.4, ...o };
+  // sitting on the slab, shins folded back under the thighs so the bum is on the floor
+  return { torso: -12, neck: 5, shL: -8, shR: -8, elL: 22, elR: 22, hipL: 96, hipR: 100, knL: 128, knR: 132, breathe: 0.4, ...o };
 }
 
 /** seated on a chair / chair-height edge, feet on the floor */
