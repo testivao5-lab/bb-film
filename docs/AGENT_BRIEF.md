@@ -87,7 +87,7 @@ git push origin HEAD:main
 ## 5. Art direction: match the approved cold open
 - **Style:** elevated South-Park-inspired flat vector, with rich shading (shade band plus light band plus rim light), soft gradients, dark outlines on characters, and parallax depth.
 - **Characters** fill 1/3 to 2/3 of frame height in dialogue and close shots.
-- **Study first:** `src/scenes/ColdOpen.tsx` and `src/scenes/ColdOpenB.tsx` (shot structure, camera, lighting, finishing) and the approved stills in `out/qa/` (if present). The test clip is on the client's Drive.
+- **Study first:** `src/scenes/ColdOpen.tsx` and `src/scenes/ColdOpenB.tsx` (shot structure, camera, lighting, finishing) and the approved reference sheets in `docs/ref/` (cold open contact sheets + cast sheet). The test clip is on the client's Drive.
 - **Always finish every shot** with `<Finish f={...} vig grain shadow gradeO />` from `src/fx/Post.tsx`, plus `Motes` where there's light in air.
 - **Palette anchors** (keep sets consistent between batches):
 
