@@ -116,6 +116,20 @@ git push origin HEAD:main
    Global frame = (narration second × 30).
    - Check: scale, depth layers, poses (no broken or floating limbs, feet on the floor), faces readable, action matches the word at that time, no text overlays.
 3. Your sandbox may be small and can crash on long renders. Render **short ranges** only (`--from/--to` ≤ 150 frames), or use the GitHub **Preview stills** workflow (Actions tab), which renders the frames you list into a contact sheet.
+
+### Preview stills via API (recommended QA — ~75 s for 20 frames, no local crash risk)
+Push first, then:
+```bash
+T=<TOKEN>; R=testivao5-lab/bb-film
+curl -s -X POST -H "Authorization: Bearer $T" https://api.github.com/repos/$R/actions/workflows/preview.yml/dispatches \
+  -d '{"ref":"main","inputs":{"composition":"BreakingFilm","frames":"1140,1200,1300","tag":"batchA-s002-v1"}}'
+# wait ~2 min, then find the run + download the artifact:
+RUN=$(curl -s -H "Authorization: Bearer $T" "https://api.github.com/repos/$R/actions/workflows/preview.yml/runs?per_page=1" | python3 -c "import sys,json;print(json.load(sys.stdin)['workflow_runs'][0]['id'])")
+URL=$(curl -s -H "Authorization: Bearer $T" https://api.github.com/repos/$R/actions/runs/$RUN/artifacts | python3 -c "import sys,json;print(json.load(sys.stdin)['artifacts'][0]['archive_download_url'])")
+curl -sL -H "Authorization: Bearer $T" "$URL" -o qa.zip && unzip -o qa.zip -d out/gh_qa   # then view out/gh_qa/contact_sheet.jpg
+```
+Frames are GLOBAL film frames (scene cut_in seconds × 30, see docs/BATCHES.md). Use a unique `tag` each time.
+
 4. Fix anything wrong, then push. In your chat report, say exactly which checks you did and which you did not.
 
 ## 8. Definition of done (per scene)
