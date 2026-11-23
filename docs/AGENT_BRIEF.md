@@ -117,6 +117,9 @@ git push origin HEAD:main
    - Check: scale, depth layers, poses (no broken or floating limbs, feet on the floor), faces readable, action matches the word at that time, no text overlays.
 3. Your sandbox may be small and can crash on long renders. Render **short ranges** only (`--from/--to` ≤ 150 frames), or use the GitHub **Preview stills** workflow (Actions tab), which renders the frames you list into a contact sheet.
 
+### Type check on push
+Every push runs the **Type check** workflow. If it goes red after your push, fix it immediately (`git pull --rebase`, fix, push) — a broken main blocks all four batches.
+
 ### Preview stills via API (recommended QA — ~75 s for 20 frames, no local crash risk)
 Push first, then:
 ```bash
