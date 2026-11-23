@@ -1,0 +1,117 @@
+# Free parallel render farm on GitHub Actions.
+# Actions tab → "Render film" → Run workflow. The finished MP4 appears under the run's "Artifacts".
+name: Render film
+
+on:
+  workflow_dispatch:
+    inputs:
+      composition:
+        description: "Composition id (TestClip for a quick test, BreakingFilm for the full film)"
+        default: "TestClip"
+        required: true
+      chunks:
+        description: "How many parallel machines (1-20)"
+        default: "20"
+        required: true
+      crf:
+        description: "Quality (lower = better/bigger). 18 = same as the approved test clip"
+        default: "18"
+        required: true
+
+concurrency:
+  group: render-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NARRATION_ID: ${{ vars.NARRATION_DRIVE_ID || '1Sj3hZAk7Z7TkplEKAaY1nbWkNzIhl_wd' }}
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.m.outputs.matrix }}
+    steps:
+      - id: m
+        run: |
+          N=${{ inputs.chunks }}; [ "$N" -gt 20 ] && N=20; [ "$N" -lt 1 ] && N=1
+          echo "matrix=$(python3 -c "import json;print(json.dumps(list(range($N))))")" >> "$GITHUB_OUTPUT"
+
+  render:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        index: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Chrome dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libnss3 libatk1.0-0t64 libatk-bridge2.0-0t64 libxdamage1 libxkbcommon0 libgbm1 libasound2t64 fonts-dejavu-core >/dev/null
+          npx remotion browser ensure
+      - name: Narration
+        run: pipx run gdown "$NARRATION_ID" -O public/narration.wav
+      - name: Render chunk ${{ matrix.index }}
+        run: node tools/chunk.mjs --comp "${{ inputs.composition }}" --index ${{ matrix.index }} --of ${{ strategy.job-total }} --crf ${{ inputs.crf }} --concurrency 4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chunk-${{ matrix.index }}
+          path: out/chunks/chunk_*.mp4
+          retention-days: 1
+          compression-level: 0
+
+  audio:
+    needs: plan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Chrome dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libnss3 libatk1.0-0t64 libatk-bridge2.0-0t64 libxdamage1 libxkbcommon0 libgbm1 libasound2t64 fonts-dejavu-core >/dev/null
+          npx remotion browser ensure
+      - name: Narration
+        run: pipx run gdown "$NARRATION_ID" -O public/narration.wav
+      - name: Render full audio mix (narration + SFX)
+        run: node tools/chunk.mjs --comp "${{ inputs.composition }}" --audio
+      - uses: actions/upload-artifact@v4
+        with:
+          name: audio
+          path: out/chunks/audio.wav
+          retention-days: 1
+
+  assemble:
+    needs: [render, audio]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          path: out/chunks
+          merge-multiple: true
+      - name: Join chunks + mux audio
+        run: bash tools/assemble.sh "out/${{ inputs.composition }}.mp4"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.composition }}-video
+          path: out/${{ inputs.composition }}.mp4
+          retention-days: 14
+          compression-level: 0
