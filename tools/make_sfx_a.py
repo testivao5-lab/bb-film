@@ -99,4 +99,45 @@ for st in (0.14, 0.46, 0.78, 1.14):
     crack[s:s + L] += hp(rng.standard_normal(L), 0.6) * np.exp(-tt * 90) * 0.8
 save("a_flicker", buzz * gate * 0.5 + crack)
 
+# ── kitchen cough: two throat bursts + a wheeze tail ──
+d = t(1.1)
+x = np.zeros_like(d)
+for st, amp in ((0.06, 1.0), (0.34, 0.72)):
+    s = int(SR * st); L = min(int(SR * 0.22), len(d) - s)
+    tt = np.arange(L) / SR
+    nz = rng.standard_normal(L)
+    # throat rasp: band-ish noise with a fast body thump
+    rasp = hp(lp(nz, 0.25), 0.06) * np.exp(-tt * 28) * amp
+    thump = np.sin(2 * np.pi * (95 - 40 * tt) * tt) * np.exp(-tt * 34) * 0.55 * amp
+    x[s:s + L] += rasp * 1.4 + thump
+# exhale wheeze after the second burst
+s = int(SR * 0.56); L = min(int(SR * 0.5), len(d) - s)
+tt = np.arange(L) / SR
+x[s:s + L] += hp(rng.standard_normal(L), 0.35) * np.exp(-tt * 5) * 0.35 * (0.5 + 0.5 * np.sin(2 * np.pi * 7 * tt) ** 2)
+save("a_cough", x)
+
+# ── bacon sizzle: crackle spikes over a frying hiss ──
+d = t(2.6)
+n = rng.standard_normal(len(d))
+hiss = hp(n, 0.55) * 0.5 * (0.7 + 0.3 * np.sin(2 * np.pi * 0.7 * d))
+base = lp(n, 0.02) * 0.5
+spk = np.zeros_like(d)
+for _ in range(170):
+    s = int(SR * rng.uniform(0.05, 2.52))
+    L = int(SR * rng.uniform(0.01, 0.05))
+    if s + L >= len(d):
+        continue
+    tt = np.arange(L) / SR
+    spk[s:s + L] += hp(rng.standard_normal(L), 0.7) * np.exp(-tt * rng.uniform(200, 500)) * rng.uniform(0.4, 1.0)
+save("a_sizzle", hiss + base + spk * 0.9)
+
+# ── ceramic clink: plate/tap set-down, two partials ──
+d = t(0.45)
+x = np.zeros_like(d)
+for fq, amp, dec in ((2150, 1.0, 26), (3480, 0.55, 34), (5100, 0.25, 44)):
+    x += np.sin(2 * np.pi * fq * d) * np.exp(-d * dec) * amp
+tick = hp(rng.standard_normal(int(SR * 0.02)), 0.6) * np.exp(-np.arange(int(SR * 0.02)) / SR * 300)
+x[:len(tick)] += tick * 0.8
+save("a_clink", x)
+
 print("batch A sfx ok")
