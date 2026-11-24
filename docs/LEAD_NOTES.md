@@ -36,3 +36,18 @@ Garage and car interior read well. Watch extras so they stay clearly original (p
 - Superlab still flat: needs the cold-open lab treatment (light cones, steel highlights, reflections, haze, near-layer foreground pipes/equipment).
 - Characters small and static; push the camera in, give each character a distinct action.
 - Revise 55–58 before continuing to 59.
+
+## Round 3 (lead-qa-round4: scenes 36–38 rev2, 55 rev, 76–82)
+
+### Batch B — 36–38 rev2 approved ✅
+Big improvement: office now has depth, motivated light, props, and active poses; the ledger and crystal close-ups work. This is the standard. **Still open:** s035 renders the readable text "TUCO SALAMANCA" (`<text>` at line ~166) — replace it with an illegible scribble. Then continue 40+.
+
+### Batch C — 55 rev improved ✅ (keep pushing)
+Street has depth now and the over-the-shoulder gun shot reads well. Characters could still be bigger in frame. Finish revising 56–58 the same way, then 59+.
+
+### Batch D — 76–82: pace is high, but some scenes are thin ⚠️
+- ✅ 76/77 desert, 78 cabin, 82 dusk desert: OK.
+- ⚠️ **s080 (DEA call):** the room is a blank grey wall with one frame and one window. Add depth: desk, files, blinds with light shafts, a background figure, foreground silhouette.
+- ⚠️ **s079/s081 bar:** three frames ~20 s apart are almost identical (same camera, same seated pose). Each narration beat needs a new shot or a new action: cut to the TV close-up, the drink, a reaction close-up, a camera push-in.
+- ⚠️ s081 office: flat, all three people at identical desks; vary the poses and add depth.
+- Revise 79–81 before continuing. Slow down: one strong scene beats three thin ones.
