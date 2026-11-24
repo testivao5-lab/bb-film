@@ -27,6 +27,15 @@ git pull --rebase "$U" main && git push "$U" HEAD:main 2>&1 | sed "s/$T/***/g"
 ```
 The token starts with `github_pat_` — paste it **without** the `< >` brackets.
 
+### Reuse existing sets & kits (keeps locations consistent across batches)
+Before building a set, check what already exists and **import it read-only** instead of re-drawing the same location:
+- `src/env/LabExterior.tsx`, `src/env/Lab.tsx`, `src/env/Vehicles.tsx` (lead): desert night, lab, cars.
+- `src/env/b_basement.tsx`, `b_kitchen.tsx`, `b_garage.tsx`, `b_street.tsx`, `b_common.tsx`; `src/props/b_pose.tsx`, `b_props.tsx` (batch B).
+- `src/env/c_street.tsx`, `c_superlab.tsx` (batch C).
+- `src/env/d_sets.tsx`, `d_interiors.tsx`, `d_shared.tsx`; `src/props/d_actor.tsx`, `d_poses.ts`, `d_props.tsx`, `d_vehicle.tsx`, `d_cam.ts` (batch D — includes a daytime desert).
+- **Never edit another batch's file.** If you need a variation, wrap it or copy it into your own prefixed file (`src/env/<batch>_*.tsx`).
+- The same location must look like the same place everywhere (same palette, layout, key props).
+
 ## 2. What you own (no merge conflicts)
 - You own **only** your scene files: `src/film/scenes/sNNN_*.tsx`, for the scene numbers in your batch (see `docs/BATCHES.md`).
 - Each stub already contains:
@@ -125,7 +134,7 @@ git push origin HEAD:main
 3. Your sandbox may be small and can crash on long renders. Render **short ranges** only (`--from/--to` ≤ 150 frames), or use the GitHub **Preview stills** workflow (Actions tab), which renders the frames you list into a contact sheet.
 
 ### Type check on push
-Every push runs the **Type check** workflow. If it goes red after your push, fix it immediately (`git pull --rebase`, fix, push) — a broken main blocks all four batches.
+Every push runs the **Type check** workflow. If it goes red after your push, fix it immediately (`git pull --rebase`, fix, push) — a broken main blocks every batch.
 
 ### Preview stills via API (recommended QA — ~75 s for 20 frames, no local crash risk)
 Push first, then:

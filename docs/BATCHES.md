@@ -1,13 +1,15 @@
 # Batches — who builds what
 
-Scene 1 (cold open) is done by the lead agent. Each batch ≈ 6.7 min of film. Scene files: `src/film/scenes/sNNN_<id>.tsx`.
+Scene 1 (cold open) is done by the lead agent. Updated: batches A and D were split — **E = 16–29**, **F = 88–98** (6 agents). Scene files: `src/film/scenes/sNNN_<id>.tsx`.
 
 | Batch | Scenes | Film time |
 |---|---|---|
-| A | 2–29 | 37.7s – 452.7s |
+| A | 2–15 | 37.7s – 231.4s |
+| E | 16–29 | 231.4s – 452.7s |
 | B | 30–52 | 452.7s – 857.7s |
 | C | 53–72 | 857.7s – 1245.1s |
-| D | 73–98 | 1245.1s – 1644.3s |
+| D | 73–87 | 1245.1s – 1517.5s |
+| F | 88–98 | 1517.5s – 1644.3s |
 
 | # | id | set | in (s) | out (s) | dur | batch |
 |---|---|---|---|---|---|---|
@@ -26,20 +28,20 @@ Scene 1 (cold open) is done by the lead agent. Each batch ≈ 6.7 min of film. S
 | 13 | `tvnews` | livingroom | 176.95 | 196.66 | 19.7 | A |
 | 14 | `raid` | suburb | 196.66 | 208.29 | 11.6 | A |
 | 15 | `jesse-window` | suburb | 208.29 | 231.45 | 23.2 | A |
-| 16 | `moment` | suburb | 231.45 | 237.02 | 5.6 | A |
-| 17 | `filing` | livingroom | 237.02 | 253.53 | 16.5 | A |
-| 18 | `garbage` | livingroom | 253.53 | 279.11 | 25.6 | A |
-| 19 | `rv-buy` | junkyard | 279.11 | 292.18 | 13.1 | A |
-| 20 | `briefs` | desert | 292.18 | 304.81 | 12.6 | A |
-| 21 | `blue` | desert | 304.81 | 318.05 | 13.2 | A |
-| 22 | `art` | desert | 318.05 | 338.90 | 20.8 | A |
-| 23 | `alive` | desert | 338.90 | 346.62 | 7.7 | A |
-| 24 | `first-sale` | desert | 346.62 | 358.72 | 12.1 | A |
-| 25 | `stall` | rvInside | 358.72 | 373.40 | 14.7 | A |
-| 26 | `phosphine` | desert | 373.40 | 396.62 | 23.2 | A |
-| 27 | `fire` | desert | 396.62 | 423.52 | 26.9 | A |
-| 28 | `basement` | basement | 423.52 | 435.82 | 12.3 | A |
-| 29 | `list` | kitchenNight | 435.82 | 452.74 | 16.9 | A |
+| 16 | `moment` | suburb | 231.45 | 237.02 | 5.6 | E |
+| 17 | `filing` | livingroom | 237.02 | 253.53 | 16.5 | E |
+| 18 | `garbage` | livingroom | 253.53 | 279.11 | 25.6 | E |
+| 19 | `rv-buy` | junkyard | 279.11 | 292.18 | 13.1 | E |
+| 20 | `briefs` | desert | 292.18 | 304.81 | 12.6 | E |
+| 21 | `blue` | desert | 304.81 | 318.05 | 13.2 | E |
+| 22 | `art` | desert | 318.05 | 338.90 | 20.8 | E |
+| 23 | `alive` | desert | 338.90 | 346.62 | 7.7 | E |
+| 24 | `first-sale` | desert | 346.62 | 358.72 | 12.1 | E |
+| 25 | `stall` | rvInside | 358.72 | 373.40 | 14.7 | E |
+| 26 | `phosphine` | desert | 373.40 | 396.62 | 23.2 | E |
+| 27 | `fire` | desert | 396.62 | 423.52 | 26.9 | E |
+| 28 | `basement` | basement | 423.52 | 435.82 | 12.3 | E |
+| 29 | `list` | kitchenNight | 435.82 | 452.74 | 16.9 | E |
 | 30 | `faint` | basement | 452.74 | 457.60 | 4.9 | B |
 | 31 | `talk-down` | basement | 457.60 | 478.69 | 21.1 | B |
 | 32 | `sell-me` | basement | 478.69 | 494.83 | 16.1 | B |
@@ -98,14 +100,14 @@ Scene 1 (cold open) is done by the lead agent. Each batch ≈ 6.7 min of film. S
 | 85 | `machine` | compound | 1470.67 | 1484.46 | 13.8 | D |
 | 86 | `jack-lie` | compound | 1484.46 | 1500.69 | 16.2 | D |
 | 87 | `circle` | compound | 1500.69 | 1517.54 | 16.8 | D |
-| 88 | `chain` | compound | 1517.54 | 1528.63 | 11.1 | D |
-| 89 | `handprint` | labNight | 1528.63 | 1544.01 | 15.4 | D |
-| 90 | `diner` | diner | 1544.01 | 1557.69 | 13.7 | D |
-| 91 | `ticket` | corporate | 1557.69 | 1579.11 | 21.4 | D |
-| 92 | `graymatter-end` | corporate | 1579.11 | 1588.81 | 9.7 | D |
-| 93 | `for-me-a` | bedroom | 1588.81 | 1599.88 | 11.1 | D |
-| 94 | `for-me` | black | 1599.88 | 1604.81 | 4.9 | D |
-| 95 | `number` | black | 1604.81 | 1615.83 | 11.0 | D |
-| 96 | `roles` | black | 1615.83 | 1620.51 | 4.7 | D |
-| 97 | `smartest` | sunset | 1620.51 | 1630.28 | 9.8 | D |
-| 98 | `ozymandias` | sunset | 1630.28 | 1644.32 | 14.0 | D |
+| 88 | `chain` | compound | 1517.54 | 1528.63 | 11.1 | F |
+| 89 | `handprint` | labNight | 1528.63 | 1544.01 | 15.4 | F |
+| 90 | `diner` | diner | 1544.01 | 1557.69 | 13.7 | F |
+| 91 | `ticket` | corporate | 1557.69 | 1579.11 | 21.4 | F |
+| 92 | `graymatter-end` | corporate | 1579.11 | 1588.81 | 9.7 | F |
+| 93 | `for-me-a` | bedroom | 1588.81 | 1599.88 | 11.1 | F |
+| 94 | `for-me` | black | 1599.88 | 1604.81 | 4.9 | F |
+| 95 | `number` | black | 1604.81 | 1615.83 | 11.0 | F |
+| 96 | `roles` | black | 1615.83 | 1620.51 | 4.7 | F |
+| 97 | `smartest` | sunset | 1620.51 | 1630.28 | 9.8 | F |
+| 98 | `ozymandias` | sunset | 1630.28 | 1644.32 | 14.0 | F |
