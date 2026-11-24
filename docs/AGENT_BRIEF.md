@@ -18,9 +18,14 @@ sudo apt-get install -y libnss3 libnspr4 libatk1.0-0t64 libatk-bridge2.0-0t64 li
 npx remotion browser ensure
 pip install gdown && gdown 1Sj3hZAk7Z7TkplEKAaY1nbWkNzIhl_wd -O public/narration.wav   # narration (needed for audio only)
 git config user.name "agent-<BATCH>" && git config user.email "agent-<BATCH>@users.noreply.github.com"
-git remote set-url origin https://x-access-token:<TOKEN>@github.com/testivao5-lab/bb-film.git
 ```
-The client gives you `<TOKEN>` and `<BATCH>` in the chat. **Never** print the token in files, commits, or logs.
+The client gives you `<TOKEN>` and `<BATCH>` in the chat. **Never** write the token into any file (including `.git/config`), commit, or log.
+Push/pull with the token **inline in the command only** (nothing is saved to disk):
+```bash
+T='<TOKEN>'; U="https://x-access-token:$T@github.com/testivao5-lab/bb-film.git"
+git pull --rebase "$U" main && git push "$U" HEAD:main 2>&1 | sed "s/$T/***/g"
+```
+The token starts with `github_pat_` — paste it **without** the `< >` brackets.
 
 ## 2. What you own (no merge conflicts)
 - You own **only** your scene files: `src/film/scenes/sNNN_*.tsx`, for the scene numbers in your batch (see `docs/BATCHES.md`).
