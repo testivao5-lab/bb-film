@@ -228,3 +228,61 @@ export const CMoths: React.FC<{ f: number; x: number; y: number; n?: number; r?:
   })}
  </g>
 );
+
+/** Original unbadged compact crossover, side profile: 4.5 m long, 1.62 m tall, hood at .98 m.
+ *  Deliberately generic — no brand marks, no lettering. Faces +x (front to the right). */
+export const CCrossover: React.FC<{
+  cam: Cam; x: number; z: number; f: number; body?: string; brake?: number; dip?: number; flash?: number; door?: number; flip?: boolean;
+}> = ({ cam, x, z, f, body = "#62756d", brake = 0, dip = 0, flash = 0, door = 0, flip = false }) => (
+  <Card cam={cam} x={x} z={z} flip={flip} blur={false}>
+    <CShadow rx={2.28} ry={.52} o={.46}/>
+    <g transform={`scale(1 .78) rotate(${dip * 1.6} -2.25 -0.3)`}>
+      {/* body mass with wheel-arch notches */}
+      <path d="M-2.25,-.3 l.12,-.58 q.1,-.3 .5,-.38 l.52,-.1 .38,-.5 q.16,-.3 .52,-.32 h1.16 q.36,0 .6,.3 l.62,.7 .58,.12 q.46,.1 .54,.44 l.1,.32 v.48 h-4.94z"
+        fill={body} stroke="#141a1e" strokeWidth=".06" strokeLinejoin="round"/>
+      {/* greenhouse: windshield, side glass, pillars */}
+      <path d="M-.62,-2.28 h1.42 q.2,0 .34,.16 l.62,.78 h-2.52 q-.06,-.5 .14,-.94z" fill="#9ab8bd" opacity=".72" stroke="#202b30" strokeWidth=".035"/>
+      <path d="M-.36,-2.24 l.14,.84 M.72,-2.2 l.28,.8" stroke="#3b4d53" strokeWidth=".05"/>
+      <path d="M-1.52,-1.48 q.36,-.28 .8,-.3 l.42,-.52 q.14,-.24 .42,-.24" fill="none" stroke="#202b30" strokeWidth=".05"/>
+      {/* hood line + shoulder crease */}
+      <path d="M.96,-1.42 h1.42 q.36,0 .5,.3" fill="none" stroke="#222c31" strokeWidth=".045"/>
+      <path d="M-2.02,-.78 h4.62" stroke="#a8b9b0" strokeWidth=".045" opacity=".5"/>
+      <path d="M-2.1,-.5 h4.8" stroke="#d5c18b" strokeWidth=".03" opacity=".28"/>
+      {/* door seam + handle (door can swing open via `door`) */}
+      <g transform={`translate(${door * .12},${-door * .02}) rotate(${-door * 8} .88 -1.42)`}>
+        <path d="M-.62,-1.42 h1.5 v1.2 q0,.06 -.06,.06 h-1.38 q-.06,0 -.06,-.06 Z" fill={body} stroke="#222c31" strokeWidth=".035"/>
+        <path d="M-.5,-1.32 h1.2 v.5 h-1.2 Z" fill="#9ab8bd" opacity=".55" stroke="#202b30" strokeWidth=".022"/>
+        <path d="M.28,-.72 h.26 v.09 h-.26z" fill="#c9d2d0" stroke="#222c31" strokeWidth=".02"/>
+      </g>
+      {/* lights */}
+      <rect x="1.98" y="-1.3" width=".16" height=".28" rx=".04" fill="#edb46c" opacity={.55 + .45 * flash}/>
+      <ellipse cx="2.2" cy="-1.18" rx={.16 + .3 * flash} ry={.09 + .1 * flash} fill="#fff1c5" opacity={.5 + .4 * flash}/>
+      <rect x="-2.2" y="-.74" width=".13" height=".24" rx=".035" fill={brake > 0 ? "#e95c48" : "#a2463c"} opacity={.75 + .25 * brake}/>
+      <ellipse cx="-2.18" cy="-.62" rx={.16 + .2 * brake} ry={.1 + .12 * brake} fill="#e95c48" opacity={.3 * brake}/>
+      {/* wheels with simple hub geometry */}
+      {[-1.32, 1.3].map((cx, i) => (
+        <g key={i}>
+          <circle cx={cx} cy="-.16" r=".38" fill="#171b20" stroke="#adb2ac" strokeWidth=".055"/>
+          <circle cx={cx} cy="-.16" r=".18" fill="#777d7e"/>
+          <path d={`M${cx - .13},-.16 h.26 M${cx},-.29 v.26`} stroke="#d9dedb" strokeWidth=".038"/>
+          <circle cx={cx} cy="-.16" r=".045" fill="#3c4448"/>
+        </g>
+      ))}
+      {/* sill shadow */}
+      <path d="M-2.22,-.24 q2.2,-.12 4.5,0" stroke="#141a1e" strokeWidth=".08" opacity=".5" fill="none"/>
+    </g>
+  </Card>
+);
+
+/** dust/grit kicked up at a point on the road (needs CSoftDefs) */
+export const CGrit: React.FC<{ f: number; cam: Cam; x: number; z: number; t: number; n?: number; seed?: number }> = ({ f, cam, x, z, t, n = 10, seed = 2 }) => {
+  if (t <= 0 || t >= 1) return null;
+  return <g>{Array.from({ length: n }).map((_, i) => {
+    const a = rand(i, seed) * Math.PI * 2;
+    const sp = 0.5 + rand(i, seed + 1) * 1.3;
+    const px = x + Math.cos(a) * t * sp * 1.6, pz = z + Math.sin(a) * t * sp * 0.6;
+    const h = 0.05 + rand(i, seed + 2) * 0.4 * Math.sin(Math.PI * t);
+    const p = project(cam, px, h, pz);
+    return <circle key={i} cx={p.x} cy={p.y} r={(0.02 + rand(i, seed + 3) * 0.05) * p.s} fill={i % 2 ? "#c9b9a0" : "#8f8069"} opacity={0.5 * (1 - t)} />;
+  })}</g>;
+};

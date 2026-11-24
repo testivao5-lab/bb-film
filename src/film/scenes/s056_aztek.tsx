@@ -1,124 +1,361 @@
-// SCENE 056 · an unbadged compact crossover breaks the corner standoff; impact is staged, not graphic.
+// SCENE 056 · "aztek" · street — the corner standoff is broken by a car. Revised per lead QA:
+// figures fill 1/3–2/3 frame height, contact points touch surfaces (hood + pavement), 3 depth
+// layers with near-FG silhouettes kept at frame edges, hard cuts on sentence ends, word-synced.
 import React from "react";
-import { AbsoluteFill, useCurrentFrame } from "remotion";
-import { Cam, Card, W, H } from "../../lib/camera";
-import { breath, blink, clamp, easeIn, easeInOut, easeOut, lerp, noise1, prog } from "../../lib/anim";
+import { AbsoluteFill, Sequence, Audio, staticFile, useCurrentFrame } from "remotion";
+import { Cam, Card, W, H, project } from "../../lib/camera";
+import { breath, blink, clamp, easeIn, easeInOut, easeOut, kf, lerp, noise1, prog } from "../../lib/anim";
 import { Figure, Pose, STAND } from "../../rig/Figure";
+import type { HeadLook } from "../../rig/Head";
 import { PARTNER, partnerLook, TEACHER, teacherLook } from "../../rig/cast";
-import { CNightStreet } from "../../env/c_street";
+import { CNightStreet, CStorefront, CParkedCar, CSidewalkBits, CNearFG, CWarmPool, CNightHaze, CCrossover, CGrit } from "../../env/c_street";
+import { CSoftDefs, CShadow, CDust } from "../../env/c_common";
 import { Finish, Motes, Streak } from "../../fx/Post";
 
-export const META={n:56,id:"aztek",set:"street",cutIn:918.5,cutOut:943.54};
-export const beat=(sec:number)=>Math.round((sec-META.cutIn)*30);
-const T={hit:beat(922.22),impact:beat(923.28),flip:beat(925.78),land:beat(927.26),reach:beat(927.96),arrive:beat(929.66),exit:beat(930.08),gun:beat(931.10),shot:beat(932.08),react:beat(934.8),run:beat(936.8),advice:beat(938.06),last:beat(942.8)};
-const still:Pose={...STAND,breathe:.32};
-const DE1={...PARTNER.pal,skin:"#bc896c",skinShade:"#895e4b",skinLight:"#d7a78b",jacket:"#564d49",jacketShade:"#3b3535",jacketLight:"#74655e",outline:"#1b1717"};
-const DE2={...PARTNER.pal,skin:"#dbb08b",skinShade:"#ae8065",skinLight:"#f1c6a3",jacket:"#384556",jacketShade:"#263441",jacketLight:"#556679",outline:"#181514"};
-const shortHair={base:"#28211e",dark:"#161313",light:"#5a4439",style:"buzz" as const};
-const lookDealer=(f:number,salt:number)=>({hair:shortHair,glasses:false,stubble:.5,age:.3,lids:.18+blink(f,salt)*.72,lookX:-.3,lookY:0,brow:.38,mouth:"flat" as const});
-const DealerPerson:React.FC<{cam:Cam;f:number;x:number;z:number;variant:0|1}>=({cam,f,x,z,variant})=><Card cam={cam} x={x} z={z} blur={false}>
- <Figure pose={{...still,shL:variant?8:-4,shR:variant?-8:11,elL:variant?18:8,elR:variant?8:30,breathe:breath(f+variant*39,.062)}} view={.12} look={lookDealer(f,variant?13:2)} pal={variant?DE2:DE1} height={variant?1.79:1.82}/>
-</Card>;
-const Dodge:React.FC<{cam:Cam;x:number;z:number;f:number;hit:number;roll?:number}> = ({cam,x,z,f,hit,roll=0})=><Card cam={cam} x={x} z={z} blur={false}>
- <g transform={`rotate(${roll} 0 -0.75)`}><g transform="scale(1 .75)">
-  {/* 4.55 m long, ~1.75 m tall original rounded compact SUV, deliberately no badging */}
-  <ellipse cx="0" cy="-.2" rx="2.45" ry=".33" fill="#0a1117" opacity=".48"/>
-  <path d="M-2.25,-.28 l.16,-.69 q.12,-.28 .48,-.35 l.65,-.12 .42,-.62 q.18,-.29 .55,-.3 h1.18 q.38,0 .64,.32 l.67,.72 .66,.13 q.47,.1 .56,.44 l.15,.47 v.45 h-4.55z" fill="#62756d" stroke="#151c20" strokeWidth=".065"/>
-  <path d="M-.52,-2.34 h1.44 q.22,0 .38,.19 l.66,.81 h-2.48z" fill="#9ab8bd" opacity=".78" stroke="#202b30" strokeWidth=".035"/>
-  <path d="M-.45,-2.22 v.82 M.8,-2.2 v.82" stroke="#394b51" strokeWidth=".045"/>
-  <path d="M-2.07,-.72 h4.72" stroke="#a8b9b0" strokeWidth=".045" opacity=".55"/>
-  <path d="M-2.18,-.45 h6.0" stroke="#d5c18b" strokeWidth=".04"/>
-  <rect x="1.96" y="-1.35" width=".14" height=".25" rx=".03" fill="#edb46c"/>
-  <rect x="-2.22" y="-.71" width=".12" height=".22" rx=".03" fill="#e95c48"/>
-  {[-1.4,1.28].map((cx,i)=><g key={i}><circle cx={cx} cy="-.16" r=".38" fill="#171b20" stroke="#adb2ac" strokeWidth=".06"/><circle cx={cx} cy="-.16" r=".18" fill="#777d7e"/><path d={`M${cx-.14},-.16 h.28 M${cx},-.3 v.28`} stroke="#d9dedb" strokeWidth=".04"/></g>)}
-  {/* headlight spill tracks the front corner */}
-  <ellipse cx="2.28" cy="-.91" rx={.3+.4*hit} ry={.1+.12*hit} fill="#fff1c5" opacity={.65+.25*hit}/>
- </g></g>
-</Card>;
-const Dealers:React.FC<{cam:Cam;f:number;carX:number;struck:number;flying:number;landed:number;reaching:number}> = ({cam,f,carX,struck,flying,landed,reaching})=>{
- const ax=lerp(-.65,carX-.1,struck);
- return <>
-  {/* First man folds below the visible belt line as the nearside wheel crosses; vehicle occludes the impact. */}
-  <Card cam={cam} x={ax} z={7.55} blur={false}>
-   <Figure pose={{...still,torso:lerp(0,86,struck),neck:lerp(0,-13,struck),shL:lerp(-4,22,struck),shR:lerp(8,48,struck),elL:lerp(8,32,struck),elR:lerp(22,66,struck),hipL:lerp(2,28,struck),hipR:lerp(-1,-38,struck),knL:lerp(3,78,struck),knR:lerp(3,94,struck),breathe:breath(f,.1)}} view={.9} look={lookDealer(f,4)} pal={DE1} height={1.82}/>
+export const META = { n: 56, id: "aztek", set: "street", cutIn: 918.5, cutOut: 943.54 };
+export const beat = (sec: number) => Math.round((sec - META.cutIn) * 30);
+
+const T = {
+  pont: beat(920.16), aztec: beat(920.64),
+  cutB: beat(922.22), one: beat(922.70), under: beat(923.28), wheels: beat(923.60),
+  cutC: beat(924.34), over: beat(924.88), hood: beat(925.22), lands: beat(925.78),
+  leg: beat(926.36), wrong: beat(927.26), reach: beat(927.96), anyway: beat(928.66),
+  cutD: beat(929.66), walks: beat(930.08), picks: beat(931.10), up: beat(931.62),
+  shoots: beat(932.08), head: beat(932.78), jesse: beat(933.58),
+  cutE: beat(934.80), word: beat(935.52), run: beat(936.80),
+  threat: beat(938.42), advice: beat(939.50), given: beat(940.42),
+  killed: beat(941.78), men: beat(942.56), end: beat(943.54),
+};
+
+/* ── original extras, same rig + palettes as scene 55 for continuity ── */
+const DE1 = { skin: "#bc896c", skinShade: "#895e4b", skinLight: "#d7a78b", jacket: "#564d49", jacketShade: "#3b3535", jacketLight: "#74655e", shirt: "#aa8770", shirtShade: "#745946", pants: "#3d4851", pantsShade: "#2c353d", shoes: "#282426", outline: "#1b1717" };
+const DE2 = { skin: "#dbb08b", skinShade: "#ae8065", skinLight: "#f1c6a3", jacket: "#384556", jacketShade: "#263441", jacketLight: "#556679", shirt: "#c3b390", shirtShade: "#95866a", pants: "#44454a", pantsShade: "#2f3035", shoes: "#282426", outline: "#181514" };
+const darkHair: HeadLook["hair"] = { base: "#25211f", dark: "#141313", light: "#514038", style: "buzz" };
+const dLook = (f: number, salt: number, o: Partial<HeadLook> = {}): HeadLook => ({ hair: darkHair, glasses: false, stubble: .5, age: .32, lids: .18 + blink(f, salt) * .72, lookX: -.3, lookY: 0, brow: .38, mouth: "flat" as const, ...o });
+const stand: Pose = { ...STAND, breathe: .32 };
+
+/** pistol lying on the pavement (unbranded generic shape) */
+const GunProp: React.FC<{ cam: Cam; x: number; z: number; ang?: number; s?: number }> = ({ cam, x, z, ang = -12, s = 1 }) => (
+  <Card cam={cam} x={x} z={z} blur={false}>
+    <CShadow rx={.16} ry={.035} o={.4}/>
+    <g transform={`translate(0,-.028) rotate(${ang}) scale(${s})`}>
+      <path d="M-.13,-.032 h.3 q.026,0 .026,.022 v.022 q0,.022 -.026,.022 h-.3 q-.022,0 -.022,-.022 v-.022 q0,-.022 .022,-.022z" fill="#2b2f31" stroke="#111517" strokeWidth=".011"/>
+      <path d="M-.04,.028 v.105 q0,.01 .01,.01 h.05 q.01,0 .01,-.01 v-.105z" fill="#4c4036" stroke="#15181c" strokeWidth=".008"/>
+    </g>
   </Card>
- </>;
+);
+
+/* ── dealer struck under the wheels: folds below the belt line, occluded by the car body ── */
+const StruckMan: React.FC<{ cam: Cam; f: number; x: number; z: number; strike: number }> = ({ cam, f, x, z, strike }) => (
+  <Card cam={cam} x={x} z={z} blur={false}>
+    <CShadow rx={.36 + .2 * strike} ry={.1} o={.42}/>
+    <Figure pose={{
+      ...stand, torso: lerp(0, 84, strike), neck: lerp(0, -16, strike),
+      shL: lerp(-4, 30, strike), shR: lerp(11, 56, strike), elL: lerp(8, 40, strike), elR: lerp(30, 72, strike),
+      hipL: lerp(2, 32, strike), hipR: lerp(-1, -38, strike), knL: lerp(3, 84, strike), knR: lerp(3, 100, strike),
+      breathe: breath(f, .1),
+    }} view={.86} look={dLook(f, 4, { lookX: -.6, brow: .7, mouth: strike > .3 ? "open" : "flat", mouthOpen: strike * .5 })}
+      pal={DE1} height={1.82}/>
+  </Card>
+);
+
+/* ── dealer tumbling over the hood — contact kept: body rides the surface ── */
+const TumbleMan: React.FC<{ cam: Cam; f: number; x: number; y: number; tt: number }> = ({ cam, f, x, y, tt }) => {
+  const torso = kf(tt * 100, [[0, -16], [22, -58], [50, -84], [74, -116], [100, -88]]);
+  const pose: Pose = {
+    ...stand, torso, neck: lerp(4, -10, tt),
+    shL: lerp(48, 30, tt), elL: lerp(30, 62, tt), shR: lerp(-40, -22, tt), elR: lerp(20, 54, tt),
+    hipL: lerp(30, 18, tt), hipR: lerp(-26, -12, tt), knL: lerp(52, 30, tt), knR: lerp(40, 22, tt), breathe: .05,
+  };
+  return <Card cam={cam} x={x} y={y} z={9.18} blur={false}>
+    <ellipse cx={0} cy={0.02} rx={.52} ry={.1} fill="#0a1117" opacity={.34}/>
+    <Figure pose={pose} view={.8} look={dLook(f, 7, { lookX: -.5, lookY: -.4, brow: .8, mouth: "open", mouthOpen: .5 })}
+      pal={DE2} height={1.79} ground={false}/>
+  </Card>;
 };
-const A:React.FC<{f:number}>=({f})=>{
- const drive=prog(f,beat(920.16),T.hit,easeIn); const x=lerp(-8.1,-1.8,drive);
- const shake=drive>.97?noise1(f*.7,2)*.04:0;
- const cam:Cam={x:lerp(-.8,-.1,clamp(f/T.hit)),y:1.2+shake,z:1.75,f:1300,shiftY:70};
- const light=prog(f,beat(920.64),T.hit);
- return <>
-  <svg width={W} height={H}><CNightStreet cam={cam} f={f}/>
-   <Card cam={cam} x={-4.1} z={7.8} blur={false}><Figure pose={{...still,torso:-3,shL:lerp(4,20,light),elL:lerp(8,38,light),shR:lerp(-4,18,light),elR:lerp(8,28,light),breathe:breath(f,.12)}} view={.26} look={partnerLook({yaw:.62,lids:.2+blink(f,9)*.8,lookX:.9,brow:-.68,mouth:"flat",dirt:.12})} pal={PARTNER.pal} height={PARTNER.height} outfit="hoodie"/></Card>
-   <Dodge cam={cam} x={x} z={7.25} f={f} hit={light}/>
-   <DealerPerson cam={cam} f={f} x={1.0} z={8.5} variant={0}/><DealerPerson cam={cam} f={f} x={2.7} z={8.7} variant={1}/>
-   <path d={`M${960+600*light},${500+Math.sin(f*.35)*6} L${1400+300*light},${500+Math.sin(f*.35)*6}`} stroke="#fff0c4" strokeWidth={12+26*light} opacity={.1+.25*light}/>
-  </svg><Streak x={1330} y={460} w={1200} color="#ffe7ae" o={.12+.35*light}/><Motes f={f} n={32} seed={56} color="#d8ccbc" drift={-1}/><Finish f={f} vig={.74} grain={.075} shadow="#08101c" gradeO={.23}/>
- </>;
+
+/* ── dealer down on the pavement, leg bent the wrong way, reaching for the gun ── */
+const DownMan: React.FC<{ cam: Cam; f: number; x: number; z: number; reach: number; jolt: number }> = ({ cam, f, x, z, reach, jolt }) => (
+  <Card cam={cam} x={x} z={z} blur={false}>
+    <CShadow rx={.62} ry={.16} o={.5}/>
+    <Figure pose={{
+      torso: 84 + jolt * -3, neck: -10, shL: 22, elL: 48, shR: lerp(60, 88, reach), elR: lerp(70, 18, reach), wrR: lerp(0, -14, reach),
+      hipL: 34, hipR: -18, knL: 86, knR: -62, breathe: .04 + breath(f, .12) * .03,
+    }} view={.9} look={dLook(f, 7, { lookX: -.6, lookY: -.35, brow: .85, mouth: "pain", mouthOpen: .35 + jolt * .3 })}
+      pal={DE2} height={1.79}/>
+  </Card>
+);
+
+/* ───────────────────────── shot A · the car arrives (0–112) ───────────────────────── */
+const ShotA: React.FC<{ f: number }> = ({ f }) => {
+  const u = clamp(f / T.cutB);
+  const cam: Cam = { x: lerp(-1.5, -.95, easeInOut(u)), y: 1.3, z: 3.15, f: 1260, shiftY: 42 };
+  const drive = prog(f, 0, T.aztec, easeIn);
+  const brake = prog(f, T.aztec, T.cutB, easeOut);
+  const cx = lerp(-8.6, -1.15, drive) + brake * .55;
+  const dip = brake > 0 ? 1 : 0;
+  const flash = prog(f, T.pont - 8, T.pont + 22);
+  const scared = prog(f, T.pont, T.pont + 16);
+  return <>
+    <svg width={W} height={H}>
+      <CSoftDefs/>
+      <CNightStreet cam={cam} f={f}/>
+      <CNightHaze f={f} y={H * .58} o={.1}/>
+      <CStorefront cam={cam} x={2.6} z={12.4} f={f} lit={.85}/>
+      <CSidewalkBits cam={cam} x={6.4} z={10.6}/>
+      <CParkedCar cam={cam} x={-3.55} z={9.6} f={f} color="#3f515d" flip/>
+      <CWarmPool cam={cam} x={-1.2} z={8.7} r={2.3} o={.3} f={f}/>
+      {/* the two men at the corner — different reactions when the headlights hit them */}
+      <Card cam={cam} x={1.55} z={8.62} blur={false}>
+        <CShadow rx={.34} ry={.1} o={.4}/>
+        <Figure pose={{ ...stand, torso: -3, neck: lerp(0, 8, scared), shL: lerp(18, 52, scared), elL: lerp(34, 76, scared), shR: lerp(10, 44, scared), elR: lerp(26, 68, scared), breathe: breath(f, .09) }}
+          view={.22} look={dLook(f, 2, { yaw: lerp(.55, .2, scared), lookX: lerp(-.4, -.9, scared), brow: .5, mouth: scared > .5 ? "gasp" : "flat" })}
+          pal={DE1} height={1.82}/>
+      </Card>
+      <Card cam={cam} x={3.1} z={8.85} blur={false}>
+        <CShadow rx={.34} ry={.1} o={.38}/>
+        <Figure pose={{ ...stand, torso: 2, neck: lerp(0, -6, scared), shL: 6, elL: 16, shR: -8, elR: 14, hipL: 6, hipR: -4, breathe: breath(f + 39, .062) }}
+          view={.1} look={dLook(f, 13, { yaw: .4, lookX: lerp(-.2, -.75, scared), brow: .42, mouth: "flat" })}
+          pal={DE2} height={1.79}/>
+      </Card>
+      {/* Jesse, gun still low in his fist, recoiling a step */}
+      <Card cam={cam} x={lerp(-2.95, -3.15, scared)} z={6.5} blur={false}>
+        <CShadow rx={.36} ry={.1} o={.45}/>
+        <Figure pose={{ ...stand, torso: -4 - scared * 3, neck: 5, shL: lerp(30, 22, scared), elL: lerp(52, 40, scared), shR: 14, elR: 24, hipL: lerp(8, 14, scared), hipR: -5, knL: lerp(6, 12, scared), breathe: breath(f, .11) }}
+          view={.42} look={partnerLook({ yaw: lerp(.62, .3, scared), lids: .2 + blink(f, 9) * .75, lookX: .85, brow: lerp(-.55, -.9, scared), mouth: scared > .5 ? "gasp" : "flat", dirt: .18 })}
+          pal={PARTNER.pal} height={PARTNER.height} outfit="hoodie"/>
+        <g transform="translate(-.16,-.92) rotate(28)"><path d="M-.1,-.03 h.28 v.07 h-.28z" fill="#272b2d" stroke="#111517" strokeWidth=".012"/><path d="M-.01,.025 v.09 h.07 v-.09" fill="#4c4036"/></g>
+      </Card>
+      {/* the car: headlights sweep the corner, brakes hard on "Aztec" */}
+      <CCrossover cam={cam} x={cx} z={9.55} f={f} flash={flash} dip={dip} brake={brake}/>
+      <CGrit f={f} cam={cam} x={cx + 1.9} z={9.5} t={prog(f, T.aztec, T.cutB)} n={12} seed={3}/>
+      <Streak x={project(cam, cx + 2.2, 1.2, 9.55).x} y={project(cam, cx + 2.2, 1.2, 9.55).y} w={900} color="#ffe7ae" o={.12 + .28 * flash}/>
+      <CNearFG cam={cam} x={-1.34} z={4.0} kind="pole" w={.55}/>
+    </svg>
+    <Motes f={f} n={30} seed={56} color="#d8ccbc" drift={-.9}/>
+    <Finish f={f} vig={.72} grain={.075} shadow="#08101c" gradeO={.23}/>
+  </>;
 };
-const B:React.FC<{f:number}>=({f})=>{
- const move=prog(f,T.impact,beat(926.88));const stop=prog(f,beat(926.0),beat(928.0));
- const carX=lerp(-1.65,1.35,prog(f,T.impact,beat(925.0),easeOut));
- const cam:Cam={x:lerp(.2,1.1,clamp(move)),y:1.1,z:2.25,f:1380,shiftY:44};
- const struck=prog(f,T.impact,beat(923.95));const flying=prog(f,beat(924.72),T.land);const landed=prog(f,beat(926.55),T.land);const reaching=prog(f,T.reach,beat(929.0));
- const shake= f<T.impact+20 ? noise1(f*.9,44)*2*(1-(f-T.impact)/20):0;
- return <>
-  <svg width={W} height={H}><CNightStreet cam={{...cam,x:cam.x+shake*.003}} f={f}/>
-   <Dealers cam={cam} f={f} carX={carX} struck={struck} flying={flying} landed={landed} reaching={reaching}/>
-   <Dodge cam={cam} x={carX} z={7.5} f={f} hit={prog(f,T.impact,T.impact+9)} roll={shake*.8}/>
-   {/* Airborne figure is staged over the hood silhouette, then lands on the pavement beyond the front wheel. */}
-   <Card cam={cam} x={lerp(2.55,3.45,flying)} y={1.38*Math.sin(Math.PI*flying)} z={7.15} blur={false} opacity={prog(f,beat(924.72),beat(925.1))}>
-    <Figure pose={{...still,torso:lerp(-26,82,landed),neck:lerp(12,-8,landed),shL:lerp(48,18,landed),shR:lerp(-46,60,landed),elL:lerp(62,52,landed),elR:lerp(22,76,landed),hipL:lerp(45,26,landed),hipR:lerp(-30,-22,landed),knL:lerp(58,92,landed),knR:lerp(44,31,landed),breathe:.02}} view={.82} look={lookDealer(f,7)} pal={DE2} height={1.79}/>
-    <g opacity={reaching} transform="translate(.35,-.92) rotate(18)"><path d="M-.08,-.03 h.38 v.12 h-.38z" fill="#292c31" stroke="#0f1418" strokeWidth=".022"/><path d="M.04,.08 v.13 h.1 v-.13" fill="#51453a"/></g>
-   </Card>
-   {/* tire grit, a few quick specks rather than a graphic impact cloud */}
-   {Array.from({length:9},(_,i)=>{const p=prog(f,T.impact,T.impact+12);return <circle key={i} cx={930+(i-4)*27+(i%2?shake*4:0)} cy={600+(i%3)*35-p*80} r={2+(i%3)} fill={i%2?"#d9cab2":"#e7b86f"} opacity={p*(1-p)*.52}/>;})}
-   <Card cam={cam} x={-4.2} z={10} blur={false} opacity={.8}><Figure pose={{...still,torso:-3,shL:20,elL:38,shR:14,elR:24,breathe:breath(f+8,.1)}} view={.2} look={partnerLook({yaw:.65,lids:.23+blink(f,9)*.75,lookX:.9,brow:-.8,mouth:"gasp"})} pal={PARTNER.pal} height={PARTNER.height} outfit="hoodie"/></Card>
-  </svg><Motes f={f} n={36} seed={65} color="#d9cbbb" drift={-.8}/><Finish f={f} vig={.76} grain={.08} shadow="#08111d" gradeO={.24}/>
- </>;
+
+/* ───────────────────────── shot B · under the wheels (112–175) ───────────────────────── */
+const ShotB: React.FC<{ f: number }> = ({ f }) => {
+  const u = clamp((f - T.cutB) / (T.cutC - T.cutB));
+  const shake = f < T.cutB + 16 ? noise1(f * .9, 44) * (1 - (f - T.cutB) / 16) * 2.4 : 0;
+  const cam: Cam = { x: lerp(.15, .85, easeInOut(u)) + shake * .004, y: 1.3 + shake * .004, z: 3.35, f: 1240, shiftY: 52 };
+  // the car crosses left→right; the man is struck as the nose reaches him
+  const roll = prog(f, T.cutB, T.cutC, easeInOut);
+  const cx = lerp(-1.7, 2.3, roll);
+  const strike = prog(f, T.cutB + 8, T.cutB + 26, easeIn);
+  const dip = Math.sin(Math.PI * clamp((f - T.cutB) / 60)) > .3 ? 1 : 0;
+  return <>
+    <svg width={W} height={H}>
+      <CSoftDefs/>
+      <CNightStreet cam={cam} f={f}/>
+      <CStorefront cam={cam} x={2.6} z={12.4} f={f} lit={.8}/>
+      <CWarmPool cam={cam} x={-1.2} z={8.7} r={2.3} o={.28} f={f}/>
+      {/* he folds as the front corner reaches him, then the body passes over him */}
+      <StruckMan cam={cam} f={f} x={lerp(.55, 1.05, strike)} z={9.5} strike={strike}/>
+      <CCrossover cam={cam} x={cx} z={9.62} f={f} flash={.2} dip={dip} brake={.2}/>
+      <CGrit f={f} cam={cam} x={cx + 1.3} z={9.55} t={prog(f, T.cutB + 10, T.cutB + 46)} n={12} seed={5}/>
+      <CGrit f={f} cam={cam} x={cx - 1.3} z={9.55} t={prog(f, T.under, T.wheels + 20)} n={10} seed={9}/>
+      {/* Jesse at the left edge throws an arm up against the light */}
+      <Card cam={cam} x={-3.15} z={6.35} blur={false}>
+        <CShadow rx={.36} ry={.1} o={.45}/>
+        <Figure pose={{ ...stand, torso: -8, neck: 8, shL: 52, elL: 78, shR: 40, elR: 66, hipL: 16, hipR: -8, knL: 12, breathe: breath(f, .13) }}
+          view={.38} look={partnerLook({ yaw: .45, lids: .26 + blink(f, 9) * .8, lookX: .85, lookY: -.1, brow: -.95, mouth: "gasp", dirt: .18 })}
+          pal={PARTNER.pal} height={PARTNER.height} outfit="hoodie"/>
+      </Card>
+      <CNearFG cam={cam} x={1.28} z={4.25} kind="bin" w={.8}/>
+    </svg>
+    <Motes f={f} n={30} seed={562} color="#d9cbbb" drift={-.8}/>
+    <Finish f={f} vig={.74} grain={.078} shadow="#08111d" gradeO={.24}/>
+  </>;
 };
-const C:React.FC<{f:number}>=({f})=>{
- const pull=prog(f,T.exit,T.gun), shoot=prog(f,T.shot,T.shot+7),end=prog(f,T.react,T.run);
- const carX=1.2;
- const cam:Cam={x:lerp(1.3,.15,clamp(end)),y:1.25,z:2.6,f:1510,shiftY:22};
- const wx=lerp(-1.05,1.4,pull);
- return <>
-  <svg width={W} height={H}><CNightStreet cam={cam} f={f}/>
-   <Dodge cam={cam} x={carX} z={7.7} f={f} hit={.35}/>
-   {/* survivor on pavement: his reach and Walt's retrieval read clearly, no gore */}
-   <Card cam={cam} x={3.3} y={.06} z={7.45} blur={false}>
-    <Figure pose={{...still,torso:83,neck:-8,shL:22,elL:46,shR:64,elR:72,hipL:38,hipR:-20,knL:84,knR:19,breathe:.03}} view={.9} look={lookDealer(f,7)} pal={DE2} height={1.79}/>
-   </Card>
-   {/* Walt exits on the first named movement, circles the vehicle, then bends to lift the dropped gun. */}
-   <Card cam={cam} x={wx} z={6.65} blur={false}>
-    <Figure pose={{...still,torso:lerp(-2,16,pull),shL:lerp(18,56,pull),elL:lerp(32,58,pull),wrL:lerp(0,-12,pull),shR:lerp(15,52,pull),elR:lerp(24,72,pull),wrR:lerp(0,22,pull),hipL:lerp(7,23,pull),hipR:lerp(-2,-8,pull),knL:lerp(6,23,pull),knR:lerp(3,11,pull),breathe:breath(f,.09)}} view={.28} look={teacherLook({yaw:.62,lids:.18+blink(f,15)*.75,lookX:.62,brow:-.42,mouth:"flat"})} pal={TEACHER.pal} height={TEACHER.height}/>
-    {/* generic compact pistol shape, kept small and unbranded */}
-    <g opacity={prog(f,T.gun,T.shot+4)} transform="translate(.23,-.86) rotate(-8)"><path d="M-.12,-.05 h.34 v.09 h-.34z" fill="#272b2d" stroke="#111517" strokeWidth=".016"/><path d="M-.02,.02 v.12 h.09 v-.12" fill="#4c4036"/></g>
-   </Card>
-   {/* shot is a tight white-hot blink over the target's shoulder, not an explicit wound */}
-   <circle cx={projectShot(cam,3.3).x} cy={projectShot(cam,3.3).y} r={36+shoot*24} fill="#fff4d0" opacity={shoot*(1-shoot)*.88}/>
-   <Card cam={cam} x={-4.0} z={10} blur={false} opacity={1-end}><Figure pose={{...still,shL:18,elL:35,breathe:breath(f+10,.12)}} view={.15} look={partnerLook({yaw:.65,lids:.27+blink(f,29)*.8,lookX:.92,brow:-.9,mouth:"open"})} pal={PARTNER.pal} height={PARTNER.height} outfit="hoodie"/></Card>
-  </svg><Motes f={f} n={30} seed={66} color="#d7ccbd" drift={-.9}/><Finish f={f} vig={.77} grain={.08} shadow="#08111d" gradeO={.24}/>
- </>;
+
+/* ───────────────────────── shot C · over the hood (175–316) ───────────────────────── */
+const ShotC: React.FC<{ f: number }> = ({ f }) => {
+  const u = clamp((f - T.cutC) / (T.cutD - T.cutC));
+  const cam: Cam = { x: lerp(1.4, 3.35, easeInOut(u)), y: 1.22, z: 3.0, f: 1280, shiftY: 38 };
+  const cx = kf(f, [[T.cutC, 2.0], [T.hood + 20, 3.05], [T.lands + 30, 3.3]]);
+  // the second man rides the hood (contact kept), arcs off, lands, then reaches
+  const tt = prog(f, T.cutC, T.lands, easeInOut);
+  const tx = kf(tt * 100, [[0, 2.6], [30, 3.9], [55, 4.7], [100, 5.5]]);
+  const ty = kf(tt * 100, [[0, 0], [16, .98], [34, 1.04], [56, 1.0], [74, 1.18], [100, 0]]);
+  const down = f >= T.lands;
+  const reach = prog(f, T.reach, T.anyway + 12);
+  const jolt = prog(f, T.lands, T.lands + 6) * (1 - prog(f, T.lands + 6, T.lands + 20));
+  const drag = prog(f, T.reach, T.anyway + 24, easeOut);
+  return <>
+    <svg width={W} height={H}>
+      <CSoftDefs/>
+      <CNightStreet cam={cam} f={f}/>
+      <CStorefront cam={cam} x={2.6} z={12.4} f={f} lit={.8}/>
+      <CSidewalkBits cam={cam} x={7.2} z={10.4}/>
+      <CWarmPool cam={cam} x={-1.2} z={8.7} r={2.3} o={.26} f={f}/>
+      <CCrossover cam={cam} x={cx} z={9.55} f={f} flash={.12} brake={.35}/>
+      {!down && <GunProp cam={cam} x={lerp(3.6, 5.9, tt)} z={8.24} ang={-18 + 260 * tt} s={.9}/>}
+      {down && reach < .9 && <GunProp cam={cam} x={6.12} z={8.24} ang={-12} s={.9}/>}
+      {!down ? <TumbleMan cam={cam} f={f} x={tx} y={ty} tt={tt}/>
+        : <DownMan cam={cam} f={f} x={5.52 + drag * .18} z={8.35} reach={reach} jolt={jolt}/>}
+      <CGrit f={f} cam={cam} x={5.55} z={8.4} t={prog(f, T.lands, T.lands + 26)} n={14} seed={11}/>
+      {/* Jesse follows the fall from the left, gun still in his fist */}
+      <Card cam={cam} x={-1.05} z={5.9} blur={false} opacity={1 - u * .3}>
+        <CShadow rx={.36} ry={.1} o={.42}/>
+        <Figure pose={{ ...stand, torso: -6, neck: 7, shL: 34, elL: 56, shR: 16, elR: 28, hipL: 12, hipR: -6, breathe: breath(f, .12) }}
+          view={.5} look={partnerLook({ yaw: .72, lids: .22 + blink(f, 21) * .78, lookX: .88, lookY: -.12, brow: -.88, mouth: "flat", dirt: .18 })}
+          pal={PARTNER.pal} height={PARTNER.height} outfit="hoodie"/>
+      </Card>
+    </svg>
+    <Motes f={f} n={32} seed={563} color="#d8cbb8" drift={-.8}/>
+    <Finish f={f} vig={.74} grain={.078} shadow="#08111d" gradeO={.24}/>
+  </>;
 };
-function projectShot(cam:Cam,x:number){const d=7.45-cam.z,s=cam.f/d;return {x:960+(x-cam.x)*s,y:540+22+(cam.y-1.2)*s};}
-const D:React.FC<{f:number}>=({f})=>{
- const run=prog(f,T.run,T.last,easeIn);const cam:Cam={x:lerp(-.5,-3.8,run),y:1.3,z:2.2,f:1350,shiftY:50};
- const wx=lerp(-2.4,-9.8,run);
- return <>
-  <svg width={W} height={H}><CNightStreet cam={cam} f={f}/>
-   <Dodge cam={cam} x={1.1} z={8} f={f} hit={.18}/>
-   {/* Walt's “run” is a firm open-palmed cue; Jesse looks back once, then breaks into a full sprint. */}
-   <Card cam={cam} x={1.25} z={7.2} blur={false}>
-    <Figure pose={{...still,shL:lerp(8,38,prog(f,T.advice,T.advice+14)),elL:lerp(14,48,prog(f,T.advice,T.advice+14)),shR:-6,elR:12,breathe:breath(f,.075)}} view={.22} look={teacherLook({yaw:.7,lids:.2+blink(f,5)*.74,lookX:-.75,brow:-.55,mouth:"flat"})} pal={TEACHER.pal} height={TEACHER.height}/>
-   </Card>
-   <Card cam={cam} x={wx} z={6.8} blur={false}>
-    <Figure pose={{...still,torso:-7+run*10,neck:lerp(8,-5,run),shL:lerp(-8,54,run)+Math.sin(f*.38)*22*run,shR:lerp(12,-45,run)-Math.sin(f*.38)*22*run,elL:lerp(16,34,run),elR:lerp(24,58,run),hipL:lerp(8,32,run)+Math.sin(f*.38)*26*run,hipR:lerp(-5,-25,run)-Math.sin(f*.38)*26*run,knL:lerp(9,70,run),knR:lerp(8,64,run),breathe:breath(f,.18)}} view={.35} look={partnerLook({yaw:lerp(.35,.8,run),lids:.23+blink(f,29)*.8,lookX:lerp(.8,-.7,run),brow:-.86,mouth:"gasp"})} pal={PARTNER.pal} height={PARTNER.height} outfit="hoodie"/>
-   </Card>
-   <path d={`M${projectShot(cam,-3).x},${projectShot(cam,-3).y} L${projectShot(cam,4).x},${projectShot(cam,4).y}`} stroke="#f0c888" strokeWidth="2" opacity={.08}/>
-  </svg><Motes f={f} n={35} seed={67} color="#dfd2c0" drift={-1.2}/><Finish f={f} vig={.75} grain={.08} shadow="#08111d" gradeO={.23}/>
- </>;
+
+/* ───────────────────────── shot D · walks over, picks it up, shoots (335–489) ───────────────────────── */
+const ShotD: React.FC<{ f: number }> = ({ f }) => {
+  const u = clamp((f - T.cutD) / (T.cutE - T.cutD));
+  const cam: Cam = { x: lerp(2.6, 3.35, easeInOut(u)), y: 1.42, z: 3.3, f: 1360, shiftY: -18 };
+  const out = prog(f, T.cutD, T.walks + 6);
+  const walk = prog(f, T.walks + 4, T.picks - 4, easeInOut);
+  const bend = prog(f, T.picks - 2, T.picks + 8, easeInOut);
+  const lift = prog(f, T.up, T.shoots, easeOut);
+  const shoot = prog(f, T.shoots, T.shoots + 8);
+  const shot = shoot * (1 - prog(f, T.shoots + 8, T.shoots + 22));
+  const flinch = prog(f, T.jesse - 6, T.jesse + 12);
+  const jolt = prog(f, T.shoots + 3, T.shoots + 7) * (1 - prog(f, T.shoots + 7, T.shoots + 18));
+  const wx = lerp(3.8, 5.22, walk);
+  const gait = Math.sin(f * .22) * 8 * walk * (1 - bend); // measured walk cycle
+  return <>
+    <svg width={W} height={H}>
+      <CSoftDefs/>
+      <CNightStreet cam={cam} f={f}/>
+      <CStorefront cam={cam} x={2.6} z={12.4} f={f} lit={.8}/>
+      <CWarmPool cam={cam} x={1.2} z={8.7} r={2.3} o={.28} f={f}/>
+      <CCrossover cam={cam} x={3.3} z={9.55} f={f} flash={.08} brake={.5} door={out}/>
+      <DownMan cam={cam} f={f} x={5.52} z={8.35} reach={1} jolt={jolt}/>
+      {!lift && <GunProp cam={cam} x={6.12} z={8.24} ang={-12} s={.9}/>}
+      {/* the driver walks over, bends, picks the gun up, straightens and fires */}
+      <Card cam={cam} x={wx} z={8.1} blur={false}>
+        <CShadow rx={.36} ry={.1} o={.42}/>
+        <Figure pose={{
+          ...stand, torso: lerp(-2, -58, bend) * (1 - lift) + lift * -2,
+          neck: lerp(6, -8, bend) * (1 - lift) + lift * 4,
+          shL: lerp(16, 40, bend) * (1 - lift) + lift * 62, elL: lerp(28, 16, bend) * (1 - lift) + lift * 12,
+          shR: lerp(12, 46, bend) * (1 - lift) + lift * 58, elR: lerp(22, 12, bend) * (1 - lift) + lift * 10,
+          hipL: lerp(8 + gait, 26, bend) * (1 - lift) + lift * 8, hipR: lerp(-3 - gait, -10, bend) * (1 - lift) + lift * -3,
+          knL: lerp(6, 30, bend) * (1 - lift) + lift * 6, knR: lerp(3, 18, bend) * (1 - lift) + lift * 3,
+          breathe: breath(f, .07),
+        }} view={.32} look={teacherLook({
+          yaw: lerp(.6, .5, lift), lids: .18 + blink(f, 15) * .7, lookX: lerp(.55, .72, lift), lookY: lerp(-.35, -.22, lift),
+          brow: lerp(-.15, -.28, shoot), mouth: "flat",
+        })} pal={TEACHER.pal} height={TEACHER.height}/>
+        <g opacity={lift} transform={`translate(${lerp(.22, .3, lift)},${lerp(-1.02, -1.16, lift)}) rotate(${-8 + shoot * -2})`}>
+          <path d="M-.12,-.035 h.3 v.075 h-.3z" fill="#272b2d" stroke="#111517" strokeWidth=".012"/>
+          <path d="M-.015,.028 v.1 h.07 v-.1" fill="#4c4036"/>
+        </g>
+      </Card>
+      {shot > 0 && (() => { const gp = project(cam, wx + .34, 1.12, 8.1); return <g>
+        <circle cx={gp.x} cy={gp.y} r={14 + shot * 18} fill="#fff6d8" opacity={shot * .9}/>
+        {[0, 1, 2, 3, 4].map(i => { const a = -1.2 + i * .55 + shot; return <line key={i} x1={gp.x + Math.cos(a) * 12} y1={gp.y + Math.sin(a) * 12} x2={gp.x + Math.cos(a) * (36 + shot * 30)} y2={gp.y + Math.sin(a) * (36 + shot * 30)} stroke="#ffe9a8" strokeWidth={3.4 * shot} strokeLinecap="round"/>; })}
+      </g>; })()}
+      {/* Jesse in the near-left watches; he flinches at the shot */}
+      <Card cam={cam} x={.1} z={5.15} blur={false}>
+        <CShadow rx={.36} ry={.1} o={.5}/>
+        <Figure pose={{
+          ...stand, torso: -4 - flinch * 5, neck: 5 + flinch * 6,
+          shL: lerp(30, 58, flinch), elL: lerp(52, 86, flinch), shR: lerp(16, 48, flinch), elR: lerp(26, 80, flinch),
+          hipL: 10, hipR: -6, breathe: breath(f, .12),
+        }} view={.62} look={partnerLook({
+          yaw: .78, lids: .24 + blink(f, 9) * .8 + flinch * .18, lookX: .85, lookY: -.1,
+          brow: -.95, mouth: flinch > .5 ? "open" : "flat", mouthOpen: flinch * .4, dirt: .18,
+        })} pal={PARTNER.pal} height={PARTNER.height} outfit="hoodie"/>
+      </Card>
+    </svg>
+    <Motes f={f} n={28} seed={564} color="#d7ccbd" drift={-.9}/>
+    <Finish f={f} vig={.75} grain={.08} shadow="#08111d" gradeO={.24}/>
+  </>;
 };
-export const Scene:React.FC=()=>{const f=useCurrentFrame();return <AbsoluteFill style={{background:"#101b2a"}}>{f<T.hit?<A f={f}/>:f<T.arrive?<B f={f}/>:f<T.react?<C f={f}/>:<D f={f}/>}</AbsoluteFill>;};
+
+/* ───────────────────────── shot E · one word: run (489–751) ───────────────────────── */
+const ShotE: React.FC<{ f: number }> = ({ f }) => {
+  const u = clamp((f - T.cutE) / (T.end - T.cutE));
+  // one motivated move: close on his face, then crane back to the whole tableau
+  const pull = prog(f, T.advice - 20, T.end, easeInOut);
+  const cam: Cam = {
+    x: lerp(5.05, 2.2, pull), y: lerp(1.56, 2.75, pull), z: lerp(6.15, 2.4, pull),
+    f: lerp(2350, 950, pull), shiftY: lerp(-40, 60, pull),
+  };
+  const say = prog(f, T.word - 8, T.word + 16) * (1 - prog(f, T.run - 6, T.run + 10));
+  const soften = prog(f, T.threat, T.advice + 8);
+  const nod = prog(f, T.advice, T.advice + 18);
+  const run = prog(f, T.given + 10, T.end, easeIn);
+  const cyc = f * .42;
+  return <>
+    <svg width={W} height={H}>
+      <CSoftDefs/>
+      <CNightStreet cam={cam} f={f}/>
+      <CStorefront cam={cam} x={2.6} z={12.4} f={f} lit={.8}/>
+      <CSidewalkBits cam={cam} x={6.4} z={10.6}/>
+      <CParkedCar cam={cam} x={-3.55} z={9.6} f={f} color="#3f515d" flip/>
+      <CWarmPool cam={cam} x={2.2} z={8.8} r={2.5} o={.28} f={f}/>
+      <CCrossover cam={cam} x={3.3} z={9.55} f={f} brake={.45} door={.8}/>
+      {/* the tableau revealed by the crane: two men down, the driver standing */}
+      <Card cam={cam} x={1.9} z={9.1} blur={false} opacity={.95}>
+        <CShadow rx={.36} ry={.1} o={.35}/>
+        <Figure pose={{ ...stand, torso: 80, neck: -12, shL: 26, elL: 52, shR: 48, elR: 64, hipL: 28, hipR: -16, knL: 82, knR: 60, breathe: .03 }}
+          view={.82} look={dLook(f, 4, { lookX: -.5, brow: .6, mouth: "flat" })} pal={DE1} height={1.82}/>
+      </Card>
+      <DownMan cam={cam} f={f} x={5.52} z={8.35} reach={1} jolt={0}/>
+      <GunProp cam={cam} x={6.12} z={8.24} ang={-12} s={.9}/>
+      {/* the driver — close at first, then a figure in the wide */}
+      <Card cam={cam} x={5.22} z={8.05} blur={false}>
+        <CShadow rx={.38} ry={.1} o={.4}/>
+        <Figure pose={{
+          ...stand, torso: -2 + nod * 2, neck: 4 - nod * 5,
+          shL: 14, elL: 26, shR: lerp(58, 30, soften), elR: lerp(12, 22, soften), wrR: lerp(6, 0, soften),
+          breathe: breath(f, .062),
+        }} view={.3} look={teacherLook({
+          yaw: .42, lids: .16 + blink(f, 15, 130) * .65 + soften * .12,
+          lookX: lerp(.2, -.55, soften), lookY: lerp(-.12, -.05, soften),
+          brow: lerp(-.2, .06, soften), mouth: say > .5 ? "open" : "flat", mouthOpen: say * .3 * (1 - nod),
+        })} pal={TEACHER.pal} height={TEACHER.height}/>
+      </Card>
+      {/* Jesse breaks into a run across the empty street */}
+      <Card cam={cam} x={lerp(-.4, -2.2, run)} z={6.3} blur={false}>
+        <CShadow rx={.4} ry={.11} o={.4}/>
+        <Figure pose={{
+          ...stand, torso: -8 + run * 12, neck: lerp(8, -6, run),
+          shL: lerp(30, 56, run) + Math.sin(cyc) * 26 * run, shR: lerp(18, -46, run) - Math.sin(cyc) * 26 * run,
+          elL: lerp(48, 34, run), elR: lerp(30, 58, run),
+          hipL: lerp(12, 34, run) + Math.sin(cyc) * 28 * run, hipR: lerp(-6, -26, run) - Math.sin(cyc) * 28 * run,
+          knL: lerp(8, 72, run), knR: lerp(6, 66, run), breathe: breath(f, .16),
+        }} view={.38} look={partnerLook({
+          yaw: lerp(.3, .8, run), lids: .24 + blink(f, 29) * .78, lookX: lerp(.6, -.7, run),
+          brow: -.88, mouth: "gasp", dirt: .18,
+        })} pal={PARTNER.pal} height={PARTNER.height} outfit="hoodie"/>
+      </Card>
+      <CDust f={f} cam={cam} n={16} seed={565} color="#e2d2ba" z0={4} z1={10} x0={-3} x1={6} h={2.4}/>
+    </svg>
+    <Motes f={f} n={30} seed={566} color="#dfd2c0" drift={-1.1}/>
+    <Finish f={f} vig={lerp(.72, .7, u)} grain={.08} shadow="#08111d" gradeO={.23}/>
+  </>;
+};
+
+/* ───────────────────────── assembly + sound ───────────────────────── */
+export const Scene: React.FC = () => {
+  const f = useCurrentFrame();
+  return (
+    <AbsoluteFill style={{ background: "#101b2a" }}>
+      <Sequence from={0} durationInFrames={T.cutB} name="A the car"><ShotA f={f} /></Sequence>
+      <Sequence from={T.cutB} durationInFrames={T.cutC - T.cutB} name="B under the wheels"><ShotB f={f} /></Sequence>
+      <Sequence from={T.cutC} durationInFrames={T.cutD - T.cutC} name="C over the hood"><ShotC f={f} /></Sequence>
+      <Sequence from={T.cutD} durationInFrames={T.cutE - T.cutD} name="D picks it up"><ShotD f={f} /></Sequence>
+      <Sequence from={T.cutE} durationInFrames={T.end - T.cutE} name="E one word"><ShotE f={f} /></Sequence>
+      <Sequence from={0} durationInFrames={T.end}><Audio src={staticFile("sfx/c_night_bed.wav")} volume={(fr) => 0.035 * clamp((T.end - fr) / 40)} /></Sequence>
+      <Sequence from={20} durationInFrames={90}><Audio src={staticFile("sfx/c_engine_stop.wav")} volume={0.11} /></Sequence>
+      <Sequence from={T.cutB} durationInFrames={30}><Audio src={staticFile("sfx/c_impact_thud.wav")} volume={0.13} /></Sequence>
+      <Sequence from={T.lands} durationInFrames={26}><Audio src={staticFile("sfx/c_impact_thud.wav")} volume={0.11} /></Sequence>
+      <Sequence from={T.shoots} durationInFrames={26}><Audio src={staticFile("sfx/c_gunshot.wav")} volume={0.13} /></Sequence>
+    </AbsoluteFill>
+  );
+};
