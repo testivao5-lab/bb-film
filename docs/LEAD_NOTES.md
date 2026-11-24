@@ -51,3 +51,9 @@ Street has depth now and the over-the-shoulder gun shot reads well. Characters c
 - ⚠️ **s079/s081 bar:** three frames ~20 s apart are almost identical (same camera, same seated pose). Each narration beat needs a new shot or a new action: cut to the TV close-up, the drink, a reaction close-up, a camera push-in.
 - ⚠️ s081 office: flat, all three people at identical desks; vary the poses and add depth.
 - Revise 79–81 before continuing. Slow down: one strong scene beats three thin ones.
+
+## Rule added (all batches) — no generic scene templates ❌
+A handoff was rejected because 14 scenes all rendered one shared generic "stage" component (same wide shot, a centred actor, a parameterised prop). That is a placeholder, not a scene.
+- Every scene must be **individually designed**: its own shot list and camera cuts, its own set dressing, and character actions synced to the narration word timestamps.
+- Shared *kits* (a set, a prop, a pose helper) are fine and encouraged; a shared *scene* that only swaps colours/props is not.
+- Reference level: `src/scenes/ColdOpen.tsx`, `ColdOpenB.tsx`, batch B s036–s038 rev2.
