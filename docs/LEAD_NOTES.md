@@ -74,3 +74,7 @@ Continue: revise 057–058 per round 1–2, then 053–054 and 059–072.
 
 ### Batch D — 084–085 ✅; 079–081 bar still static ⚠️
 The bar scenes still repeat one wide shot. Add at least: a TV close-up, a hand/drink insert, a face close-up, a slow push-in. **Agent D: after finishing 086–087, you are also assigned 088–098 (former batch F).**
+
+## Reassignment (round 5) — 6 agents, see docs/BATCHES.md
+A 2–12 · **G 13–15 + 23–29 (new)** · B 16–22 (+ fixes 049–052) · C 53–65 · **H 66–72 (new)** · D 73–98.
+Only build scenes in your own range. If you already started a scene that is now someone else's, stop, discard it, and tell the client.
