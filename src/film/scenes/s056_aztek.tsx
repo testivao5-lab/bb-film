@@ -42,11 +42,6 @@ const Dealers:React.FC<{cam:Cam;f:number;carX:number;struck:number;flying:number
   <Card cam={cam} x={ax} z={7.55} blur={false}>
    <Figure pose={{...still,torso:lerp(0,86,struck),neck:lerp(0,-13,struck),shL:lerp(-4,22,struck),shR:lerp(8,48,struck),elL:lerp(8,32,struck),elR:lerp(22,66,struck),hipL:lerp(2,28,struck),hipR:lerp(-1,-38,struck),knL:lerp(3,78,struck),knR:lerp(3,94,struck),breathe:breath(f,.1)}} view={.9} look={lookDealer(f,4)} pal={DE1} height={1.82}/>
   </Card>
-  {/* Second man takes an arc over the hood, then lands awkwardly and reaches for the dropped pistol. */}
-  <Card cam={cam} x={lerp(2.6,4.15,flying)} y={1.46*Math.sin(flying*Math.PI*.9)*(1-landed)+.12*landed} z={7.2} blur={false}>
-   <Figure pose={{...still,torso:lerp(-26,8,landed),neck:lerp(12,-5,landed),shL:lerp(48,8,landed),shR:lerp(-46,16,landed),elL:lerp(62,22,landed),elR:lerp(22,55,landed),hipL:lerp(45,28,landed),hipR:lerp(-30,-8,landed),knL:lerp(58,97,landed),knR:lerp(44,24,landed),breathe:breath(f+12,.13)}} view={.82} look={lookDealer(f,7)} pal={DE2} height={1.79}/>
-   <g opacity={reaching} transform="translate(.33,-.95) rotate(18)"><path d="M-.08,-.03 h.38 v.12 h-.38z" fill="#292c31" stroke="#0f1418" strokeWidth=".022"/><path d="M.04,.08 v.13 h.1 v-.13" fill="#51453a"/></g>
-  </Card>
  </>;
 };
 const A:React.FC<{f:number}>=({f})=>{
@@ -67,12 +62,17 @@ const B:React.FC<{f:number}>=({f})=>{
  const move=prog(f,T.impact,beat(926.88));const stop=prog(f,beat(926.0),beat(928.0));
  const carX=lerp(-1.65,1.35,prog(f,T.impact,beat(925.0),easeOut));
  const cam:Cam={x:lerp(.2,1.1,clamp(move)),y:1.1,z:2.25,f:1380,shiftY:44};
- const struck=prog(f,T.impact,beat(923.95));const flying=prog(f,T.flip,beat(926.6));const landed=prog(f,beat(926.6),T.land);const reaching=prog(f,T.reach,beat(929.0));
+ const struck=prog(f,T.impact,beat(923.95));const flying=prog(f,beat(924.72),T.land);const landed=prog(f,beat(926.55),T.land);const reaching=prog(f,T.reach,beat(929.0));
  const shake= f<T.impact+20 ? noise1(f*.9,44)*2*(1-(f-T.impact)/20):0;
  return <>
   <svg width={W} height={H}><CNightStreet cam={{...cam,x:cam.x+shake*.003}} f={f}/>
    <Dealers cam={cam} f={f} carX={carX} struck={struck} flying={flying} landed={landed} reaching={reaching}/>
    <Dodge cam={cam} x={carX} z={7.5} f={f} hit={prog(f,T.impact,T.impact+9)} roll={shake*.8}/>
+   {/* Airborne figure is staged over the hood silhouette, then lands on the pavement beyond the front wheel. */}
+   <Card cam={cam} x={lerp(2.55,3.45,flying)} y={1.38*Math.sin(Math.PI*flying)} z={7.15} blur={false} opacity={prog(f,beat(924.72),beat(925.1))}>
+    <Figure pose={{...still,torso:lerp(-26,82,landed),neck:lerp(12,-8,landed),shL:lerp(48,18,landed),shR:lerp(-46,60,landed),elL:lerp(62,52,landed),elR:lerp(22,76,landed),hipL:lerp(45,26,landed),hipR:lerp(-30,-22,landed),knL:lerp(58,92,landed),knR:lerp(44,31,landed),breathe:.02}} view={.82} look={lookDealer(f,7)} pal={DE2} height={1.79}/>
+    <g opacity={reaching} transform="translate(.35,-.92) rotate(18)"><path d="M-.08,-.03 h.38 v.12 h-.38z" fill="#292c31" stroke="#0f1418" strokeWidth=".022"/><path d="M.04,.08 v.13 h.1 v-.13" fill="#51453a"/></g>
+   </Card>
    {/* tire grit, a few quick specks rather than a graphic impact cloud */}
    {Array.from({length:9},(_,i)=>{const p=prog(f,T.impact,T.impact+12);return <circle key={i} cx={930+(i-4)*27+(i%2?shake*4:0)} cy={600+(i%3)*35-p*80} r={2+(i%3)} fill={i%2?"#d9cab2":"#e7b86f"} opacity={p*(1-p)*.52}/>;})}
    <Card cam={cam} x={-4.2} z={10} blur={false} opacity={.8}><Figure pose={{...still,torso:-3,shL:20,elL:38,shR:14,elR:24,breathe:breath(f+8,.1)}} view={.2} look={partnerLook({yaw:.65,lids:.23+blink(f,9)*.75,lookX:.9,brow:-.8,mouth:"gasp"})} pal={PARTNER.pal} height={PARTNER.height} outfit="hoodie"/></Card>
