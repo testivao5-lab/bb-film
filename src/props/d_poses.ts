@@ -1,6 +1,7 @@
 // BATCH D kit · pose vocabulary + original extra-cast builder.
 // Everything is a pure function of time. Units are metres / degrees (see src/rig/Figure.tsx).
-import type { Palette } from "../rig/Figure";
+import type { Palette, Pose } from "../rig/Figure";
+import { solveSkeleton } from "../rig/Figure";
 import type { HeadLook, HairDef } from "../rig/Head";
 import { mixHex } from "../rig/cast";
 import { breath, blink, noise1, clamp, lerp } from "../lib/anim";
@@ -150,3 +151,31 @@ export const headLife = (f: number, salt: number, amp = 1) => ({
 
 /** forearm swing helper for pointing / holding at a screen-space-ish direction on the body */
 export const lerpPose = (a: number, b: number, t: number) => lerp(a, b, clamp(t));
+
+/* ───────────────────────────── attach props to hands ───────────────────────────── */
+
+/** replicates the Figure's ground-snap so props can be pinned to hands / feet in card space */
+export function placement(pose: Pose, height: number, view: number) {
+  const S = solveSkeleton(pose, height, view);
+  const k = S.k;
+  const pts: [[number, number], number][] = [
+    [S.pelvis, 0.13 * k], [S.chest, 0.15 * k], [S.headC, 0.13 * k],
+    [S.legL.kn, 0.07 * k], [S.legR.kn, 0.07 * k], [S.legL.an, 0.06 * k], [S.legR.an, 0.06 * k],
+    [S.armL.el, 0.05 * k], [S.armR.el, 0.05 * k], [S.armL.wr, 0.04 * k], [S.armR.wr, 0.04 * k],
+  ];
+  const off = -Math.max(...pts.map(([v, r]) => v[1] + r));
+  return { S, off };
+}
+
+/** where a hand sits in card space (+y down, origin at the figure's feet) */
+export function handAt(pose: Pose, height: number, view: number, side: "L" | "R") {
+  const { S, off } = placement(pose, height, view);
+  const w = side === "L" ? S.armL.wr : S.armR.wr;
+  return { x: w[0], y: w[1] + off, ang: (side === "L" ? S.armL.a2 : S.armR.a2) };
+}
+
+/** where the head centre sits (for hats, mics, bandages) */
+export function headAt(pose: Pose, height: number, view: number) {
+  const { S, off } = placement(pose, height, view);
+  return { x: S.headC[0], y: S.headC[1] + off, rot: pose.torso + pose.neck };
+}

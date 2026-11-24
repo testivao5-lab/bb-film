@@ -24,14 +24,17 @@ export interface ActorProps {
   bloodHand?: number;
   ground?: boolean;
   opacity?: number;
+  /** draw extra things in the figure's own card space (metres, origin at the feet, +y down) */
+  children?: React.ReactNode;
 }
 
-export const Actor: React.FC<ActorProps & { blurCard?: boolean }> = ({ cam, x, z, y = 0, face = 1, view = 1, pose, look, pal, height, outfit = "jacket", rimLight, rimSide = 1, blood = 0, bloodHand = 0, ground = true, opacity = 1, blurCard = false }) => (
+export const Actor: React.FC<ActorProps & { blurCard?: boolean }> = ({ cam, x, z, y = 0, face = 1, view = 1, pose, look, pal, height, outfit = "jacket", rimLight, rimSide = 1, blood = 0, bloodHand = 0, ground = true, opacity = 1, blurCard = false, children }) => (
   <Card cam={cam} x={x} y={y} z={z} flip={face === -1} blur={blurCard} opacity={opacity}>
     {ground && (
       <ellipse cx={0.06} cy={0} rx={0.42 * (height / 1.78)} ry={0.09 * (height / 1.78)} fill="#000" opacity={0.32} />
     )}
     <Figure pose={pose} look={look} pal={pal} height={height} view={view} outfit={outfit} rimLight={rimLight} rimSide={face === -1 ? (rimSide === 1 ? -1 : 1) : rimSide} blood={blood} bloodHand={bloodHand} ground={ground} />
+    {children}
   </Card>
 );
 
