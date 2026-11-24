@@ -20,3 +20,19 @@ Basement/kitchen sets, lighting, figure scale and staging match the cold open. K
 Garage and car interior read well. Watch extras so they stay clearly original (palette/hair variation).
 
 ### Batch A — no commits seen yet.
+
+## Round 2 (lead-qa-round2: scenes 36–38, 58)
+
+### All batches — choreography is slipping ⚠️
+- **No "standing with arms hanging" poses.** In most frames characters stand stiffly with both arms down. Every shot needs an action that matches the narration (gesturing, leaning on the desk, pointing, pacing, handling a prop, reacting). Two characters in one shot must never hold the same idle pose.
+- **Framing:** no accidental crops. s037/s038 have shots showing only a giant leg + arm cut by the frame edge — if it is a deliberate low angle, show the face/upper body or the object being looked at; otherwise reframe.
+- **Speed is not the goal; the cold-open quality bar is.** Better 1 excellent scene than 3 thin ones.
+
+### Batch B (36–38) — office set too bare ⚠️
+- Tuco-office set: add depth (foreground desk clutter/shelves/silhouette, mid props, back wall detail), motivated light (window shafts, lamp pool), wear and grime, ambient motes. Compare with your own basement in s030–s035, which is on target.
+- Revise 36–38 before moving on.
+
+### Batch C (58) — same issues as round 1 ⚠️
+- Superlab still flat: needs the cold-open lab treatment (light cones, steel highlights, reflections, haze, near-layer foreground pipes/equipment).
+- Characters small and static; push the camera in, give each character a distinct action.
+- Revise 55–58 before continuing to 59.
