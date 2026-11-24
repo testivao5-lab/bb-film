@@ -4,6 +4,8 @@ You are one of several agents building scenes **in parallel** for a single film.
 
 ---
 
+**Before each new scene: `git pull --rebase` and read `docs/LEAD_NOTES.md` (lead QA feedback).**
+
 ## 0. The project in one paragraph
 This is a 27:24 narrated recap, 1920×1080 at 30 fps, written as **pure code in Remotion (React + SVG)**. The narration track `public/narration.wav` is fixed, and every scene is cut to the narration timestamps. The lead agent built the cold open (scene 1, 0–37.71 s), which the client approved as the **quality bar**. Your job is to build **your batch of scenes** at that same quality.
 
