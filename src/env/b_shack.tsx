@@ -70,6 +70,28 @@ export const DIST_DUSK = {
 export const distDuskLook = (o: any = {}) =>
   restaurateurLook({ hair: DIST_DUSK.hair, beard: "mustache", age: 0.5, lips: "#825244", ...o });
 
+/** Shallow desert wash / ditch with mounded dusk dirt berm (used in s044 & s045) */
+export const DesertDitch: React.FC<{ cam: Cam; x?: number; z?: number; w?: number }> = ({
+  cam, x = -0.8, z = 4.6, w = 1.65,
+}) => (
+  <g>
+    {/* Mounded excavated dirt berm behind */}
+    <path
+      d={flatQuad(cam, x - w * 0.62, x + w * 0.62, z + 0.15, z + 0.65, 0.08)}
+      fill="#7a533c"
+      stroke="#241710"
+      strokeWidth={1.6}
+    />
+    {/* Sunken shadow trench */}
+    <path
+      d={flatQuad(cam, x - w * 0.55, x + w * 0.55, z - 0.35, z + 0.25, -0.02)}
+      fill="#2a1912"
+      stroke="#140b08"
+      strokeWidth={2}
+    />
+  </g>
+);
+
 export const duskTint = (pal: typeof TEACHER.pal) =>
   tint(pal, (c) => (c.startsWith("#") ? mixHex(c, "#e8926b", 0.1) : c));
 
