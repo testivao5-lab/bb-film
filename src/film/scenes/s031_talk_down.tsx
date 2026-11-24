@@ -203,7 +203,7 @@ const S2: React.FC = () => {
     <AbsoluteFill>
       <svg width={W} height={H}>
         <SetBits cam={cam} f={g} />
-        <CardboardBox cam={cam} x={CHAIR.x} z={CHAIR.z + 0.1} w={0.52} h={0.4} d={0.42} seed={12} />
+        <CardboardBox cam={cam} x={CHAIR.x - 0.06} z={CHAIR.z + 0.12} w={0.52} h={0.42} d={0.44} seed={12} />
         <Prisoner cam={cam} g={g} pose={pPose} look={pLook} view={0.5} />
         <Chain cam={cam} from={[POST.x + 0.06, 0.24, POST.z + 0.02]} to={[POST.x + 0.5, 0.1, POST.z + 0.2]} sag={0.05} />
         <Card cam={cam} x={CHAIR.x} y={0} z={CHAIR.z + 0.02} flip>
