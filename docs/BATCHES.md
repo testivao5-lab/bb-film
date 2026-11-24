@@ -1,15 +1,15 @@
 # Batches — who builds what
 
-Scene 1 (cold open) is done by the lead agent. Updated: batches A and D were split — **E = 16–29**, **F = 88–98** (6 agents). Scene files: `src/film/scenes/sNNN_<id>.tsx`.
+Scene 1 (cold open) is done by the lead agent. Updated: batches A and D were split — **E = 16–29**, **F = 88–98** (6 agents). **Reassigned:** E (16–29) is now built by agent B, F (88–98) by agent D. Scene files: `src/film/scenes/sNNN_<id>.tsx`.
 
 | Batch | Scenes | Film time |
 |---|---|---|
 | A | 2–15 | 37.7s – 231.4s |
-| E | 16–29 | 231.4s – 452.7s |
+| E → agent B | 16–29 | 231.4s – 452.7s |
 | B | 30–52 | 452.7s – 857.7s |
 | C | 53–72 | 857.7s – 1245.1s |
 | D | 73–87 | 1245.1s – 1517.5s |
-| F | 88–98 | 1517.5s – 1644.3s |
+| F → agent D | 88–98 | 1517.5s – 1644.3s |
 
 | # | id | set | in (s) | out (s) | dur | batch |
 |---|---|---|---|---|---|---|

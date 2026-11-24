@@ -57,3 +57,20 @@ A handoff was rejected because 14 scenes all rendered one shared generic "stage"
 - Every scene must be **individually designed**: its own shot list and camera cuts, its own set dressing, and character actions synced to the narration word timestamps.
 - Shared *kits* (a set, a prop, a pose helper) are fine and encouraged; a shared *scene* that only swaps colours/props is not.
 - Reference level: `src/scenes/ColdOpen.tsx`, `ColdOpenB.tsx`, batch B s036–s038 rev2.
+
+## Round 4 (lead-qa-round5: A 002–003, B 040–052, C 056 rev, D 079–081 rev, 084–085)
+
+### Batch A — 002–003 approved ✅
+Highway, school exterior, a full classroom with varied original students, breakfast kitchen: rich, staged, on target. Keep this level for 004–015.
+
+### Batch B — 030–052 complete 🎉 (mostly ✅)
+- ✅ 040–048: close-ups, dusk desert, cars, gunfight aftermath and the night bedroom all read well.
+- ⚠️ 049–051: three shots in a row of one character against a plain dark background (no set, no depth). Add a location (room/airfield/house exterior), far/mid/near layers and motivated light.
+- ⚠️ 052: keep the restaurant branding fully original (own name/colours/logo, no copied fast-food chain branding).
+- **Agent B: you are now also assigned scenes 016–029 (former batch E).** Fix 049–052 first, then build 016–029 in order.
+
+### Batch C — 056 rev approved ✅
+Continue: revise 057–058 per round 1–2, then 053–054 and 059–072.
+
+### Batch D — 084–085 ✅; 079–081 bar still static ⚠️
+The bar scenes still repeat one wide shot. Add at least: a TV close-up, a hand/drink insert, a face close-up, a slow push-in. **Agent D: after finishing 086–087, you are also assigned 088–098 (former batch F).**
