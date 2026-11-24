@@ -23,6 +23,7 @@ import { AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame } from "remo
 import { Cam, Card, project, W, H, planePts } from "../../lib/camera";
 import { prog, easeIn, easeOut, easeInOut, easeOutBack, clamp, lerp, rand, breath, blink, noise1, kf } from "../../lib/anim";
 import { Figure, Pose } from "../../rig/Figure";
+import { HandBack } from "../../rig/Hands";
 import { TEACHER, teacherLook, PARTNER, partnerLook, BROTHER, brotherLook, tint, mixHex } from "../../rig/cast";
 import { ST, StreetSky, StreetRidge, StreetGround, House, BlockWall, DustDevil } from "../../env/b_street";
 import { SoftDefs, Dust, Birds, Shimmer } from "../../env/b_common";
@@ -35,7 +36,7 @@ export const META = { n: 35, id: "tuco-name", set: "street", cutIn: 525.39, cutO
 export const beat = (sec: number) => Math.round((sec - META.cutIn) * 30);
 const B = beat;
 const END = B(542.29);
-const CUTS = { s1: 0, s2: B(529.0), s3: B(539.0), end: END };
+const CUTS = { s1: 0, s2: B(529.0), s3: B(531.2), end: END };
 
 const DAY = (pal: typeof TEACHER.pal) => tint(pal, (c) => (c.startsWith("#") ? mixHex(c, "#fff0d2", 0.08) : c));
 const PAL_T = DAY(TEACHER.pal);
@@ -77,9 +78,10 @@ const S1: React.FC = () => {
     breathe: 0.6,
   });
   const poseW: Pose = {
-    torso: 2, neck: 6 - 4 * handoff, shL: 6 + 20 * handoff, shR: 4 + 34 * handoff,
-    elL: 18 + 26 * handoff, elR: 20 + 20 * handoff,
-    hipL: 3, hipR: -3, knL: 4, knR: 4, breathe: 0.5,
+    torso: 3, neck: 4 - 4 * handoff,
+    shL: -14 + 26 * handoff, shR: 26 + 14 * handoff,
+    elL: 48, elR: 38 - 12 * handoff,
+    hipL: 4, hipR: -4, knL: 4, knR: 5, breathe: 0.5,
   };
   const slip = prog(g, B(528.4), B(528.9), easeOut);
   return (
@@ -152,31 +154,46 @@ const S2: React.FC = () => {
         <House cam={cam} x={-11} z={17} w={11} h={3.1} seed={1} />
         <House cam={cam} x={11.5} z={20} w={10} h={3.0} seed={2} />
         {/* Walt's shoulder, soft, bottom-left */}
-        <Card cam={cam} x={-1.35} y={0} z={3.15} flip>
+        <Card cam={cam} x={-1.35} y={0} z={3.15} blur={false}>
           <Figure pose={{ torso: 4, neck: 8, shL: 26, shR: 40, elL: 40, elR: 70, hipL: 3, hipR: -3, knL: 4, knR: 4, breathe: 0.5 }} view={0.85}
-            look={teacherLook({ yaw: -0.5, lids: 0.2, lookX: 0.5, lookY: 0.5, brow: 0.1, mouth: "flat" })} pal={PAL_T} height={TEACHER.height} />
+            look={teacherLook({ yaw: 0.35, lids: 0.2, lookX: 0.4, lookY: 0.4, brow: 0.1, mouth: "flat" })} pal={PAL_T} height={TEACHER.height} />
         </Card>
-        {/* the slip, held up, ballpoint name */}
-        <Card cam={cam} x={-0.05} y={1.44} z={2.75}>
-          <g transform={`translate(${tremble},0) rotate(-5)`}>
-            
-            <rect x={-0.062} y={-0.042} width={0.124} height={0.084} fill="#f7f2e4" stroke="#8a8272" strokeWidth={0.0018} />
-            <path d="M-0.062,-0.012 L0.062,-0.016" stroke="#dcd4c1" strokeWidth={0.0014} />
-            <g transform="translate(-0.052,0.002) scale(0.00062)" fill="#2b3a6b">
-              <text x={0} y={0} fontFamily="DejaVu Sans, Arial" fontSize={22} letterSpacing={1.5}>TUCO SALAMANCA</text>
+        {/* the folded slip held up in Walt's articulated close-up hand (scribble + street-corner mark, zero readable name) */}
+        <Card cam={cam} x={-0.04} y={1.43} z={2.75} blur={false}>
+          <g transform={`translate(${tremble},0) rotate(-4)`}>
+            {/* torn-edge notepad slip + fold crease */}
+            <rect x={-0.068} y={-0.048} width={0.144} height={0.094} fill="#000" opacity={0.22} transform="translate(0.004,0.005)" />
+            <rect x={-0.07} y={-0.05} width={0.144} height={0.094} fill="#f7f2e4" stroke="#8a8272" strokeWidth={0.0018} />
+            <line x1={-0.068} y1={-0.022} x2={0.072} y2={-0.022} stroke="#cbd5dc" strokeWidth={0.001} />
+            <line x1={-0.068} y1={0.004} x2={0.072} y2={0.004} stroke="#cbd5dc" strokeWidth={0.001} />
+            <line x1={-0.068} y1={0.028} x2={0.072} y2={0.028} stroke="#cbd5dc" strokeWidth={0.001} />
+            <path d="M-0.07,-0.003 L0.074,-0.006" stroke="#ddd4c0" strokeWidth={0.0016} />
+            {/* ballpoint illegible cursive scribble for name + small street-corner cross sketch */}
+            <path
+              d="M-0.052,-0.014 c0.006,-0.014 0.014,0.004 0.02,-0.006 c0.005,-0.008 0.011,0.008 0.018,0 c0.006,-0.007 0.012,0.006 0.019,-0.002 M-0.006,-0.015 c0.007,-0.013 0.015,0.005 0.022,-0.005 c0.006,-0.008 0.013,0.007 0.02,-0.001 c0.006,-0.006 0.012,0.005 0.019,0"
+              stroke="#24335c"
+              strokeWidth={0.0028}
+              fill="none"
+              strokeLinecap="round"
+            />
+            <path d="M-0.052,-0.006 L0.054,-0.008" stroke="#24335c" strokeWidth={0.0016} opacity={0.75} strokeLinecap="round" />
+            {/* second line: tiny street cross + shorthand scribble */}
+            <path d="M-0.048,0.018 L-0.028,0.018 M-0.038,0.009 L-0.038,0.027" stroke="#24335c" strokeWidth={0.0018} strokeLinecap="round" />
+            <circle cx={-0.033} cy={0.013} r={0.0025} fill="#24335c" />
+            <path d="M-0.018,0.019 q0.008,-0.008 0.016,0 t0.016,0 t0.016,0" stroke="#24335c" strokeWidth={0.0022} fill="none" strokeLinecap="round" />
+
+            {/* Articulated close-up left hand (4 fingers + thumb, wrist, shirt cuff, blue jacket sleeve) */}
+            <g transform="translate(-0.088,0.052) rotate(36) scale(-0.46,0.46)">
+              <HandBack
+                pal={PAL_T}
+                curl={0.62}
+                thumb={0.78}
+                sleeve={PAL_T.jacket}
+                sleeveShade={PAL_T.jacketShade}
+                cuff={PAL_T.shirt}
+                forearm={0.85}
+              />
             </g>
-            
-            {/* fingers gripping the bottom edge, thumb at the right */}
-            {[-0.03, -0.004, 0.024].map((fx, i) => (
-              <g key={i}>
-                <path d={`M${fx},0.036 C${fx + 0.008},0.02 ${fx + 0.012},0.004 ${fx + 0.008},-0.004 C${fx + 0.002},0.004 ${fx - 0.004},0.02 ${fx - 0.006},0.036 Z`} fill="#e7b792" stroke="#6d4a34" strokeWidth={0.0016} />
-                <path d={`M${fx},0.04 L${fx + 0.006},0.075`} stroke="#e7b792" strokeWidth={0.013} strokeLinecap="round" />
-                <path d={`M${fx},0.04 L${fx + 0.006},0.075`} stroke="#c08a6b" strokeWidth={0.002} strokeLinecap="round" opacity={0.5} />
-              </g>
-            ))}
-            <path d="M0.06,0.03 C0.045,0.032 0.034,0.038 0.03,0.046 C0.038,0.052 0.052,0.052 0.062,0.048 Z" fill="#e7b792" stroke="#6d4a34" strokeWidth={0.0018} />
-            <path d="M-0.05,0.04 C-0.02,0.033 0.02,0.033 0.05,0.04 C0.058,0.05 0.046,0.066 0.018,0.07 C-0.012,0.073 -0.042,0.064 -0.05,0.052 Z" fill="#dfae8b" stroke="#6d4a34" strokeWidth={0.0016} />
-            <path d="M-0.03,0.05 C-0.01,0.045 0.014,0.045 0.034,0.05" stroke="#c08a6b" strokeWidth={0.0018} fill="none" opacity={0.7} />
           </g>
         </Card>
         <Motes f={g} n={14} color="#fff6d8" seed={11} drift={0.5} />
@@ -197,33 +214,36 @@ const S3: React.FC = () => {
     x: lerp(-2.6, 0.2, easeInOut(t)), y: lerp(1.6, 1.55, easeInOut(t)), z: lerp(3.2, 4.1, easeInOut(t)),
     f: 1350, shiftY: 45, focus: 9, aperture: 0.5,
   };
-  const walkT = clamp(f / B(6.9 + 525.39 - 525.39));
-  const wx = lerp(-4.4, -0.78, easeInOut(clamp(f / 100)));
-  const walking = f < 104 ? 1 : 0;
-  const ask = prog(g, B(536.9), B(537.6), easeInOut);
-  const lookOver = prog(g, B(537.6), B(538.4), easeInOut);
-  const nod = prog(g, B(538.0), B(538.7), easeOutBack);
-  const stepAside = prog(g, B(539.1), B(540.0), easeInOut);
-  const poseW: Pose = walking ? walkPose(f * 0.062, 1, {
-    torso: 5, neck: -2 + 6 * ask, shL: lerp(5, 2, ask), shR: lerp(-6, 28, ask),
-    elL: lerp(16, 20, ask), elR: lerp(16, 58, ask), breathe: 0.5,
+  const wx = lerp(-5.4, -2.55, easeInOut(clamp(f / 160)));
+  const walking = f < 162 ? 1 : 0;
+  const ask = prog(g, B(536.85), B(537.75), easeInOut);
+  const lookOver = prog(g, B(537.65), B(538.5), easeInOut);
+  const nod = prog(g, B(538.3), B(539.05), easeOutBack);
+  const stepAside = prog(g, B(539.1), B(540.3), easeInOut);
+  const poseW: Pose = walking ? walkPose(f * 0.07, 1, {
+    torso: 5, neck: -2, shL: -12, shR: 22,
+    elL: 44, elR: 38, breathe: 0.5,
   }) : {
-    torso: 3, neck: 8 - 6 * ask, shL: 5 - 3 * ask, shR: -6 + 30 * ask,
-    elL: 16 + 8 * ask, elR: 16 + 54 * ask, hipL: 4, hipR: -4, knL: 5, knR: 5, breathe: 0.55,
+    torso: 4, neck: -3 + 4 * ask, shL: -14, shR: lerp(22, 36, ask),
+    elL: 48, elR: lerp(42, 46, ask), hipL: 5, hipR: -5, knL: 5, knR: 6, breathe: 0.55,
   };
-  // the three men: the big one turns, nods him in; the others shift
-  const poseA: Pose = { // the big one: thumbs in his belt, then a slow nod at the door
-    torso: lerp(-4, 2, lookOver), neck: lerp(-8, 6, lookOver) + 6 * nod,
-    shL: lerp(4, 22, lookOver) - 8 * stepAside, shR: lerp(2, 26, lookOver) + 10 * nod,
-    elL: lerp(44, 58, lookOver), elR: lerp(46, 62, lookOver),
-    hipL: 2, hipR: -4 - 6 * stepAside, knL: 3 + 8 * stepAside, knR: 5, breathe: 0.5,
+  // the three men: distinct active poses (thumbs in belt + thumb-jerk at door; crossed arms; leaning on wall)
+  const poseA: Pose = {
+    torso: lerp(-4, 4, lookOver), neck: lerp(-4, 4, lookOver) + 5 * nod,
+    shL: lerp(-12, -16, nod), shR: lerp(22, 34, lookOver) - 18 * nod,
+    elL: lerp(54, 62, nod), elR: lerp(48, 58, nod),
+    hipL: 4, hipR: -5 - 5 * stepAside, knL: 4 + 7 * stepAside, knR: 5, breathe: 0.5,
   };
-  const poseB: Pose = { // folded arms
-    torso: -4 + 6 * stepAside, neck: -6 - 8 * lookOver + 6 * stepAside,
-    shL: 6 - 8 * stepAside, shR: 5, elL: 16, elR: 15,
-    hipL: 4, hipR: -4, knL: 6, knR: 4, breathe: 0.45,
+  const poseB: Pose = { // one thumb hooked in belt, other hand resting at collarbone
+    torso: -5 + 5 * stepAside, neck: -4 + 6 * stepAside,
+    shL: -12, shR: 16, elL: 54, elR: 72,
+    hipL: 6, hipR: -5, knL: 7, knR: 4, breathe: 0.45,
   };
-  const poseC: Pose = { torso: -9, neck: 4 + 6 * lookOver, shL: 6, shR: 8, elL: 18, elR: 16, hipL: 6, hipR: -2, knL: 8, knR: 4, breathe: 0.5 };
+  const poseC: Pose = { // hands tucked in jacket pockets, leaning back against block wall
+    torso: -9, neck: 5 + 5 * lookOver,
+    shL: -16, shR: -14, elL: 52, elR: 48,
+    hipL: 8, hipR: -3, knL: 10, knR: 4, breathe: 0.5,
+  };
   return (
     <AbsoluteFill>
       <svg width={W} height={H}>
@@ -243,23 +263,23 @@ const S3: React.FC = () => {
         <BlockWall cam={cam} x={-0.9} z={8.6} w={7.4} />
         {/* the men */}
         {/* ground contact shadows */}
-        {[[-2.0, 8.2], [-3.1, 9.0], [0.95, 8.35], [wx, 7.5]].map(([sx2, sz], i) => (
+        {[[-1.55, 8.1], [-0.45, 8.85], [0.95, 8.35], [wx, 7.6]].map(([sx2, sz], i) => (
           <polygon key={i} points={planePts(cam, Array.from({ length: 12 }).map((_, k) => { const a = (k / 12) * Math.PI * 2; return [sx2 + Math.cos(a) * 0.32, sz + Math.sin(a) * 0.14] as [number, number]; }), 0.012)} fill="#8a6a42" opacity={0.3} />
         ))}
-        <Card cam={cam} x={-2.0} y={0} z={8.2}>
-          <Figure pose={poseA} view={0.5} look={brotherLook({ yaw: 0.3, lids: 0.15 + blink(g, 9) * 0.5, lookX: 0.3, lookY: 0.06, brow: 0.3 + 0.4 * lookOver, mouth: nod > 0.3 ? "flat" : "neutral" })} pal={EXTRA_A.pal} height={EXTRA_A.height} rimLight="#fff6d8" rimSide={-1} />
+        <Card cam={cam} x={-1.55} y={0} z={8.1} flip>
+          <Figure pose={poseA} view={0.56} look={brotherLook({ yaw: 0.24, lids: 0.15 + blink(g, 9) * 0.5, lookX: 0.3, lookY: 0.06, brow: 0.3 + 0.4 * lookOver, mouth: nod > 0.3 ? "flat" : "neutral" })} pal={EXTRA_A.pal} height={EXTRA_A.height} rimLight="#fff6d8" rimSide={-1} />
         </Card>
-        <Card cam={cam} x={-3.1} y={0} z={9.0}>
-          <Figure pose={poseB} view={0.5} look={partnerLook({ yaw: 0.2, lids: 0.2 + blink(g, 6) * 0.5, lookX: 0.2, lookY: 0, brow: 0.2, mouth: "flat", hair: EXTRA_B.hair })} pal={EXTRA_B.pal} height={EXTRA_B.height} rimLight="#fff6d8" rimSide={-1} />
+        <Card cam={cam} x={-0.45} y={0} z={8.85} flip>
+          <Figure pose={poseB} view={0.54} look={partnerLook({ yaw: 0.2, lids: 0.2 + blink(g, 6) * 0.5, lookX: 0.25, lookY: 0, brow: 0.2, mouth: "flat", hair: EXTRA_B.hair })} pal={EXTRA_B.pal} height={EXTRA_B.height} rimLight="#fff6d8" rimSide={-1} />
         </Card>
-        <Card cam={cam} x={0.95} y={0} z={8.35}>
-          <Figure pose={poseC} view={0.5} look={partnerLook({ yaw: 0.2, lids: 0.3 + blink(g, 4) * 0.5, lookX: 0.2, lookY: 0.1, brow: 0.1, mouth: "smile", hair: EXTRA_C.hair })} pal={EXTRA_C.pal} height={EXTRA_C.height} rimLight="#fff6d8" rimSide={-1} />
+        <Card cam={cam} x={0.95} y={0} z={8.35} flip>
+          <Figure pose={poseC} view={0.55} look={partnerLook({ yaw: 0.2, lids: 0.3 + blink(g, 4) * 0.5, lookX: 0.25, lookY: 0.08, brow: 0.1, mouth: "smile", hair: EXTRA_C.hair })} pal={EXTRA_C.pal} height={EXTRA_C.height} rimLight="#fff6d8" rimSide={-1} />
         </Card>
-        {/* Walt walks up the sidewalk and stops in front of the big one */}
-        <Card cam={cam} x={wx} y={0} z={7.5} flip>
+        {/* Walt walks up the sidewalk from left and stops facing the big stranger */}
+        <Card cam={cam} x={wx} y={0} z={7.6}>
           <ellipse cx={0.04} cy={0.008} rx={0.3} ry={0.06} fill="#6a4a2a" opacity={0.32} />
-          <Figure pose={poseW} view={0.8} look={teacherLook({
-            yaw: 0.2, lids: 0.16 + blink(g, 3) * 0.5, lookX: 0.2, lookY: 0.1, brow: 0.1 + 0.2 * ask,
+          <Figure pose={poseW} view={0.62} look={teacherLook({
+            yaw: 0.22, lids: 0.16 + blink(g, 3) * 0.5, lookX: 0.3, lookY: -0.04, brow: 0.1 + 0.2 * ask,
             mouth: "open", mouthOpen: 0.1 + 0.2 * Math.abs(Math.sin(g * 0.34)) * ask,
           })} pal={PAL_T} height={TEACHER.height} rimLight="#fff6d8" rimSide={1} />
         </Card>
