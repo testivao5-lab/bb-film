@@ -152,3 +152,29 @@ export const Chair: React.FC<{ cam: Cam; x: number; z: number; s?: number }> = (
     <polygon points={qOf(cam, [[x - 0.18, 0.78, z - 0.19], [x + 0.18, 0.78, z - 0.19], [x + 0.18, 0.72, z - 0.19], [x - 0.18, 0.72, z - 0.19]])} fill={GT.woodLight} opacity={0.5} />
   </g>
 );
+
+/** a two-pane shop window in the back wall. `burst` 0..1 = intact → blown out (glass gone, frame bent) */
+export const GarageWindow: React.FC<{ cam: Cam; x: number; w?: number; burst?: number }> = ({ cam, x, w = 2.1, burst = 0 }) => {
+  const y0 = 0.95, y1 = 2.25, z = GX.zBack + 0.03;
+  return (
+    <g>
+      <polygon points={wallQuad(cam, x - w / 2 - 0.08, x + w / 2 + 0.08, y0 - 0.08, y1 + 0.08, z)} fill="#5a5147" stroke={GT.ol} strokeWidth={0.04} />
+      <polygon points={wallQuad(cam, x - w / 2, x + w / 2, y0, y1, z + 0.01)} fill="#1d2732" />
+      {/* glass, gone after the burst */}
+      <polygon points={wallQuad(cam, x - w / 2 + 0.02, x + w / 2 - 0.02, y0 + 0.02, y1 - 0.02, z + 0.02)} fill="#9fb6bd" opacity={0.5 * (1 - burst)} />
+      <polygon points={wallQuad(cam, x - w / 2 + 0.1, x - w / 2 + 0.6, y1 - 0.7, y1 - 0.06, z + 0.03)} fill="#d8e6e6" opacity={0.35 * (1 - burst)} />
+      {/* mullion, bent after */}
+      <polygon points={wallQuad(cam, x - 0.03 + 0.12 * burst, x + 0.03 + 0.12 * burst, y0, y1, z + 0.03)} fill="#6f665a" />
+      <polygon points={wallQuad(cam, x - w / 2, x + w / 2, y0 + (y1 - y0) * 0.52, y0 + (y1 - y0) * 0.52 + 0.05, z + 0.03)} fill="#6f665a" />
+      {/* blown-out shards in the air (deterministic) */}
+      {burst > 0.05 && Array.from({ length: 11 }).map((_, i) => {
+        const t = Math.min(1, burst * 1.6);
+        const px = x - w / 2 + rand(i, 21) * w + (rand(i, 22) - 0.5) * 2.2 * t;
+        const py = y0 + rand(i, 23) * (y1 - y0) + 0.5 * t * (0.4 + rand(i, 24)) - 0.9 * t * t;
+        const p = project(cam, px, Math.max(0.05, py), z - 1.4 * t * (0.4 + rand(i, 25)));
+        const len = 0.09 * (0.6 + rand(i, 26)) * p.s;
+        return <path key={i} d={`M0,0 L${len},${-len * 0.5} L${len * 0.7},${len * 0.6} Z`} transform={`translate(${p.x},${p.y}) rotate(${rand(i, 27) * 360 + t * 200})`} fill="#cfe0e4" stroke="#8fa2a8" strokeWidth={0.8} opacity={0.9 - 0.5 * burst} />;
+      })}
+    </g>
+  );
+};
