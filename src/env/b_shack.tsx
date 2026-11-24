@@ -92,6 +92,56 @@ export const DesertDitch: React.FC<{ cam: Cam; x?: number; z?: number; w?: numbe
   </g>
 );
 
+/** Matte-black tactical carbine / assault rifle in metre space (origin near pistol grip/receiver) */
+export const AssaultRifle: React.FC<{ rot?: number; flash?: number; s?: number }> = ({
+  rot = 0, flash = 0, s = 1,
+}) => (
+  <g transform={`rotate(${rot}) scale(${s})`}>
+    {/* Buttstock */}
+    <polygon points="-0.32,-0.025 -0.11,-0.032 -0.11,0.018 -0.32,0.052" fill="#23262b" stroke="#0c0e11" strokeWidth={0.007} />
+    {/* Upper & lower receiver */}
+    <rect x={-0.11} y={-0.038} width={0.23} height={0.056} rx={0.005} fill="#31363e" stroke="#0c0e11" strokeWidth={0.007} />
+    {/* Carry handle sight */}
+    <path d="M-0.07,-0.038 L-0.055,-0.066 L0.055,-0.066 L0.07,-0.038" fill="none" stroke="#252930" strokeWidth={0.011} />
+    {/* Pistol grip */}
+    <polygon points="-0.065,0.016 -0.028,0.016 -0.048,0.105 -0.088,0.098" fill="#1e2024" stroke="#0c0e11" strokeWidth={0.006} />
+    {/* Curved 30-rd magazine */}
+    <path d="M0.035,0.016 L0.082,0.016 Q0.102,0.095 0.075,0.155 L0.032,0.145 Q0.052,0.085 0.035,0.016 Z" fill="#2a2f36" stroke="#0c0e11" strokeWidth={0.006} />
+    {/* Ribbed handguard */}
+    <rect x={0.12} y={-0.034} width={0.21} height={0.044} rx={0.006} fill="#24272c" stroke="#0c0e11" strokeWidth={0.007} />
+    <line x1={0.14} y1={-0.022} x2={0.31} y2={-0.022} stroke="#4f5661" strokeWidth={0.005} />
+    {/* Front sight triangle + barrel + flash hider */}
+    <polygon points="0.33,-0.034 0.35,-0.072 0.37,-0.034" fill="#2b3038" stroke="#0c0e11" strokeWidth={0.005} />
+    <rect x={0.33} y={-0.022} width={0.17} height={0.016} fill="#3c424c" stroke="#0c0e11" strokeWidth={0.005} />
+    <rect x={0.49} y={-0.026} width={0.042} height={0.024} rx={0.003} fill="#262a30" stroke="#0c0e11" strokeWidth={0.005} />
+    {flash > 0.05 && (
+      <g transform="translate(0.535,-0.014)" opacity={flash}>
+        <polygon points="0,-0.075 0.42,-0.02 0.18,0 0.46,0.038 0,0.078 0.06,0" fill="#ff9d2e" />
+        <polygon points="0,-0.036 0.26,-0.006 0,0.038" fill="#fffce3" />
+      </g>
+    )}
+  </g>
+);
+
+/** Gold shield badge clipped to belt in metre space */
+export const BeltBadge: React.FC<{ glint?: number }> = ({ glint = 0 }) => (
+  <g>
+    <path
+      d="M-0.026,-0.032 L0,-0.042 L0.026,-0.032 L0.022,0.012 L0,0.034 L-0.022,0.012 Z"
+      fill="#e3b94b"
+      stroke="#2b1e08"
+      strokeWidth={0.004}
+    />
+    <circle cx={0} cy={-0.006} r={0.011} fill="#f7de88" />
+    {glint > 0.05 && (
+      <g stroke="#fff8d4" strokeWidth={0.004} opacity={glint}>
+        <line x1={-0.055} y1={-0.006} x2={0.055} y2={-0.006} />
+        <line x1={0} y1={-0.062} x2={0} y2={0.05} />
+      </g>
+    )}
+  </g>
+);
+
 export const duskTint = (pal: typeof TEACHER.pal) =>
   tint(pal, (c) => (c.startsWith("#") ? mixHex(c, "#e8926b", 0.1) : c));
 
